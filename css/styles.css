@@ -1,0 +1,78 @@
+/* ==========================================================================
+   META::OPT ACADEMIC DESIGN SYSTEM & COMPONENT STYLES
+   ========================================================================== */
+
+/* Custom Smooth Scrolling & Scrollbar */
+html {
+  scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f3ef;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c5c6ca;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8d706b;
+}
+
+/* KaTeX Math Equation Styling Refinement */
+.katex-display {
+  margin: 0.75rem 0 !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25rem 0;
+}
+
+.katex {
+  font-size: 1.05em;
+  text-rendering: optimizeLegibility;
+}
+
+/* Canvas Crisp Pixel Density */
+canvas {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Code Snippet Pre-blocks */
+pre code {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* Pulse Glow & Animation Utilities */
+@keyframes subtlePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+}
+
+.animate-subtle {
+  animation: subtlePulse 3s infinite ease-in-out;
+}
+
+/* Interactive Card Hover Depth */
+.academic-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.academic-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* Mobile Drawer Transition */
+#mobileDrawer {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+

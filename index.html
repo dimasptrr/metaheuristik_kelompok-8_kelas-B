@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html class="h-full scroll-smooth" lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Laboratorium Optimasi Metaheuristik: OOA &amp; ChOA</title>
+  
+  <!-- Google Fonts: Inter (Body), Newsreader (Serif Display & Headings), Space Grotesk (Academic Mono/Labels) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,400&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+  
+  <!-- Material Symbols Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+
+  <!-- KaTeX CSS & JS untuk Render Persamaan Matematika Presisi -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"/>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#fbf9f5",
+            "surface-bright": "#fbf9f5",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#f5f3ef",
+            "surface-container": "#efeeea",
+            "surface-container-high": "#eae8e4",
+            "surface-container-highest": "#e4e2de",
+            "on-surface": "#1b1c1a",
+            "on-surface-variant": "#59413c",
+            "outline": "#8d706b",
+            "outline-variant": "#e1bfb8",
+            "inverse-surface": "#1e2022",
+            "inverse-on-surface": "#f2f0ed",
+            "primary": "#ab2e16",
+            "primary-container": "#ce462c",
+            "primary-fixed": "#ffdad3",
+            "primary-fixed-dim": "#ffb4a5",
+            "on-primary": "#ffffff",
+            "on-primary-fixed-variant": "#8d1702",
+            "secondary": "#505f76",
+            "secondary-container": "#d0e1fb",
+            "on-secondary": "#ffffff",
+            "on-secondary-container": "#54647a",
+            "tertiary": "#595c60",
+            "tertiary-container": "#727578"
+          },
+          spacing: {
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "space-xl": "2.5rem",
+            "margin": "3rem",
+            "margin-mobile": "1.25rem"
+          },
+          fontFamily: {
+            "body-md": ["Inter", "sans-serif"],
+            "headline-lg": ["Newsreader", "serif"],
+            "headline-md": ["Newsreader", "serif"],
+            "headline-sm": ["Newsreader", "serif"],
+            "title-md": ["Inter", "sans-serif"],
+            "code-sm": ["Space Grotesk", "monospace"],
+            "label-md": ["Space Grotesk", "sans-serif"],
+            "label-lg": ["Space Grotesk", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body class="bg-surface font-body-md text-on-surface antialiased min-h-screen flex flex-col selection:bg-primary-fixed selection:text-on-primary-fixed-variant">
+
+  <!-- Scroll Progress Indicator Bar -->
+  <div class="fixed top-0 left-0 h-1 bg-primary z-[60] transition-all duration-75" id="scrollProgressBar" style="width: 0%;"></div>
+
+  <!-- Header & Navigasi Akademik -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-md border-b border-outline-variant/40 shadow-[0_1px_8px_rgba(0,0,0,0.03)]">
+    <div class="h-20 w-full max-w-7xl mx-auto px-margin-mobile lg:px-margin flex items-center justify-between gap-space-md">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-space-md shrink-0">
+        <a class="flex items-center gap-space-sm group" data-path="overview" href="#overview">
+          <span class="font-code-sm text-label-lg tracking-widest text-primary font-bold">META::OPT</span>
+          <span class="font-headline-sm text-lg text-on-surface border-l pl-space-sm ml-space-xs border-outline-variant hidden sm:inline-block">Symposium Lab</span>
+        </a>
+        <div class="hidden xl:flex items-center gap-space-xs px-space-sm py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant border border-outline-variant">
+          <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+          <span class="font-code-sm text-xs uppercase tracking-wider">Engine: Client-Side FP64</span>
+        </div>
+      </div>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="hidden lg:flex items-center gap-1" id="desktopNav">
+        <a class="px-space-sm py-1.5 rounded-lg text-on-surface-variant font-label-md text-sm hover:bg-surface-container-high hover:text-on-surface transition-all bg-primary text-on-primary font-semibold shadow-sm" data-path="overview" href="#overview">Overview</a>
+        <a class="px-space-sm py-1.5 rounded-lg text-on-surface-variant font-label-md text-sm hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="ooa-osprey" href="#ooa-osprey">OOA (Osprey)</a>
+        <a class="px-space-sm py-1.5 rounded-lg text-on-surface-variant font-label-md text-sm hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="choa-chimp" href="#choa-chimp">ChOA (Chimp)</a>
+        <a class="px-space-sm py-1.5 rounded-lg text-on-surface-variant font-label-md text-sm hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="interactive-lab" href="#interactive-lab">Interactive Lab</a>
+        <a class="px-space-sm py-1.5 rounded-lg text-on-surface-variant font-label-md text-sm hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="comparison" href="#comparison">Perbandingan</a>
+        <a class="px-space-sm py-1.5 rounded-lg text-on-surface-variant font-label-md text-sm hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="experiment" href="#experiment">Eksperimen</a>
+        <a class="px-space-sm py-1.5 rounded-lg text-on-surface-variant font-label-md text-sm hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="references" href="#references">Referensi</a>
+      </nav>
+
+      <!-- Action Buttons & Mobile Hamburger -->
+      <div class="flex items-center gap-space-sm shrink-0">
+        <a class="hidden sm:inline-flex items-center gap-space-xs px-space-sm py-1.5 rounded-lg bg-surface-container text-on-surface font-label-md text-xs border border-outline-variant hover:bg-surface-container-high transition-colors" href="#references">
+          <span class="material-symbols-outlined text-[16px] text-on-surface-variant">menu_book</span>
+          <span>Monograf</span>
+        </a>
+        <button class="lg:hidden p-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors" id="mobileMenuBtn" aria-label="Buka Navigasi">
+          <span class="material-symbols-outlined text-[22px]">menu</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer Backdrop & Menu -->
+  <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden lg:hidden transition-opacity" id="mobileBackdrop"></div>
+  <div class="fixed top-0 right-0 bottom-0 w-72 bg-surface z-50 translate-x-full shadow-2xl flex flex-col p-space-md lg:hidden" id="mobileDrawer">
+    <div class="flex items-center justify-between pb-space-sm border-b border-outline-variant">
+      <span class="font-code-sm font-bold text-primary">NAVIGASI MODUL</span>
+      <button class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant" id="mobileMenuCloseBtn">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+    <div class="flex flex-col gap-1 py-space-md flex-1 overflow-y-auto font-label-md text-sm">
+      <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="overview" href="#overview">Overview &amp; Fondasi</a>
+      <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="ooa-osprey" href="#ooa-osprey">OOA (Osprey Optimization)</a>
+      <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="choa-chimp" href="#choa-chimp">ChOA (Chimp Optimization)</a>
+      <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="interactive-lab" href="#interactive-lab">Laboratorium Interaktif</a>
+      <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="comparison" href="#comparison">Perbandingan Algoritma</a>
+      <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="experiment" href="#experiment">Eksperimen Monte Carlo</a>
+      <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="references" href="#references">Daftar Pustaka &amp; Sitasi</a>
+    </div>
+    <div class="pt-space-sm border-t border-outline-variant text-xs font-code-sm text-tertiary">
+      <span>IEEE-754 FP64 WASM/JS Engine</span>
+    </div>
+  </div>
+
+  <!-- Konten Utama -->
+  <main class="w-full flex-1 pt-20 bg-surface">
+    <div class="flex flex-col w-full">
+
+      <!-- Context Header Strip -->
+      <section class="w-full bg-surface-container-low py-2 px-margin-mobile lg:px-margin border-b border-outline-variant/30">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-space-xs text-on-surface-variant font-code-sm text-xs">
+          <div class="flex items-center gap-space-sm flex-wrap">
+            <span class="px-1.5 py-0.5 rounded bg-primary text-on-primary font-label-md font-semibold text-[11px]">STUDI MONOGRAF</span>
+            <span>OPTIMASI KONTINU BIO-INSPIRATIF</span>
+            <span class="hidden sm:inline">•</span>
+            <span class="text-primary font-semibold">STUDI KOMPARATIF OOA vs ChOA</span>
+          </div>
+          <div class="flex items-center gap-space-md text-[11px]">
+            <span>METODE: SIMULASI DETERMINISTIK</span>
+            <span>PREP: IEEE-754 FP64</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 1: OVERVIEW & PENGENALAN -->
+      <section class="w-full py-space-xl px-margin-mobile lg:px-margin" id="overview">
+        <div class="max-w-7xl mx-auto space-y-space-xl">
+          
+          <!-- Hero Title Block -->
+          <div class="space-y-space-md max-w-4xl">
+            <div class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded bg-surface-container text-on-surface-variant font-label-md text-xs">
+              <span class="material-symbols-outlined text-[16px] text-primary">biotech</span>
+              <span>COMPUTATIONAL INTELLIGENCE &amp; BIO-INSPIRED HEURISTICS</span>
+            </div>
+            <h1 class="font-headline-lg text-4xl lg:text-5xl text-on-surface font-semibold tracking-tight leading-tight">
+              Optimasi Metaheuristik: <span class="italic text-primary font-serif">OOA &amp; ChOA</span>
+            </h1>
+            <p class="font-body-md text-lg text-on-surface-variant leading-relaxed">
+              Mempelajari <strong>Osprey Optimization Algorithm (OOA)</strong> dan <strong>Chimp Optimization Algorithm (ChOA)</strong> melalui formulasi matematis yang ketat, visualisasi topologi ruang pencarian, serta simulasi interaktif berbasis peramban web tanpa dependensi server.
+            </p>
+          </div>
+
+          <!-- 5 Pilar Fondasi Optimasi Metaheuristik -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-space-md">
+            <div class="bg-surface-container-low p-space-md rounded-lg space-y-space-xs hover:bg-surface-container transition-colors border border-outline-variant/30 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="font-code-sm text-xs text-primary font-semibold">01 / RUANG</span>
+                <span class="material-symbols-outlined text-primary text-[20px]">architecture</span>
+              </div>
+              <h2 class="font-title-md text-base font-bold text-on-surface">Search Space ($\Omega$)</h2>
+              <p class="font-body-sm text-xs text-on-surface-variant">Domain kontinu $D$-dimensi yang dibatasi oleh vektor batas bawah $\mathbf{lb}$ dan batas atas $\mathbf{ub}$.</p>
+            </div>
+
+            <div class="bg-surface-container-low p-space-md rounded-lg space-y-space-xs hover:bg-surface-container transition-colors border border-outline-variant/30 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="font-code-sm text-xs text-primary font-semibold">02 / BIAYA</span>
+                <span class="material-symbols-outlined text-primary text-[20px]">functions</span>
+              </div>
+              <h2 class="font-title-md text-base font-bold text-on-surface">Fungsi Objektif</h2>
+              <p class="font-body-sm text-xs text-on-surface-variant">Pemetaan $f(\mathbf{x}): \Omega \to \mathbb{R}$ yang mencari minimum global $\min f(\mathbf{x})$ tanpa memerlukan turunan gradien.</p>
+            </div>
+
+            <div class="bg-surface-container-low p-space-md rounded-lg space-y-space-xs hover:bg-surface-container transition-colors border border-outline-variant/30 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="font-code-sm text-xs text-primary font-semibold">03 / AGEN</span>
+                <span class="material-symbols-outlined text-primary text-[20px]">groups</span>
+              </div>
+              <h2 class="font-title-md text-base font-bold text-on-surface">Populasi Kolektif</h2>
+              <p class="font-body-sm text-xs text-on-surface-variant">Kumpulan $N$ vektor kandidat solusi $\mathbf{X}_i$ yang bergerak secara stokastik sepanjang $T$ iterasi.</p>
+            </div>
+
+            <div class="bg-surface-container-low p-space-md rounded-lg space-y-space-xs hover:bg-surface-container transition-colors border border-outline-variant/30 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="font-code-sm text-xs text-primary font-semibold">04 / JELAJAH</span>
+                <span class="material-symbols-outlined text-primary text-[20px]">travel_explore</span>
+              </div>
+              <h2 class="font-title-md text-base font-bold text-on-surface">Exploration</h2>
+              <p class="font-body-sm text-xs text-on-surface-variant">Pencarian global berdispersi luas untuk mencegah perangkap optimum lokal (local optima trapping).</p>
+            </div>
+
+            <div class="bg-surface-container-low p-space-md rounded-lg space-y-space-xs hover:bg-surface-container transition-colors border border-outline-variant/30 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="font-code-sm text-xs text-primary font-semibold">05 / FOKUS</span>
+                <span class="material-symbols-outlined text-primary text-[20px]">radar</span>
+              </div>
+              <h2 class="font-title-md text-base font-bold text-on-surface">Exploitation</h2>
+              <p class="font-body-sm text-xs text-on-surface-variant">Kontraksi dan penajaman solusi di sekitar kandidat terbaik menuju konvergensi presisi tinggi.</p>
+            </div>
+          </div>
+
+          <!-- Featured Algorithm Cards -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-space-lg">
+            <!-- Kartu OOA -->
+            <div class="bg-surface-container-low p-space-lg rounded-xl space-y-space-md border border-outline-variant/40 shadow-sm relative overflow-hidden">
+              <div class="flex items-start justify-between">
+                <div>
+                  <span class="inline-block px-space-xs py-0.5 rounded bg-primary-fixed text-on-primary-fixed-variant font-label-md text-xs uppercase tracking-wider mb-2 font-semibold">Avian Piscivore Metaheuristic</span>
+                  <h3 class="font-headline-md text-2xl font-bold text-on-surface">OOA: Osprey Optimization</h3>
+                </div>
+                <span class="font-code-sm text-xs text-tertiary">Dehghani et al., 2023</span>
+              </div>
+              <p class="font-body-md text-sm text-on-surface-variant leading-relaxed">
+                Meniru perilaku pemangsaan ikan laut oleh burung elang tiram (<em>Pandion haliaetus</em>). Menggunakan strategi dua tahap: pendeteksian mangsa di dalam air (eksplorasi global) dan relokasi ke sarang tepi pantai (eksploitasi lokal intensif).
+              </p>
+              <div class="grid grid-cols-2 gap-space-sm font-code-sm text-xs">
+                <div class="bg-surface p-space-sm rounded border border-outline-variant/30">
+                  <span class="text-tertiary block">Fase Perilaku:</span>
+                  <span class="font-semibold text-on-surface">2-Tahap (Buru Ikan &amp; Sarang Pantai)</span>
+                </div>
+                <div class="bg-surface p-space-sm rounded border border-outline-variant/30">
+                  <span class="text-tertiary block">Hiperparameter:</span>
+                  <span class="font-semibold text-on-surface">Bebas Parameter (Stokastik $I \in \{1, 2\}$)</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between pt-space-xs">
+                <a class="inline-flex items-center gap-space-xs text-primary font-semibold text-sm hover:underline" href="#ooa-osprey">
+                  <span>Pelajari Teori OOA</span>
+                  <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </a>
+                <a class="inline-flex items-center gap-space-xs px-space-md py-2 rounded bg-primary text-on-primary font-label-md text-xs hover:bg-primary-container transition-colors shadow-sm" href="#interactive-lab" onclick="window.MetaOpt.setAlgorithm('ooa')">
+                  <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+                  <span>Buka Simulasi OOA</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Kartu ChOA -->
+            <div class="bg-surface-container-low p-space-lg rounded-xl space-y-space-md border border-outline-variant/40 shadow-sm relative overflow-hidden">
+              <div class="flex items-start justify-between">
+                <div>
+                  <span class="inline-block px-space-xs py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-md text-xs uppercase tracking-wider mb-2 font-semibold">Primate Social Pack Intelligence</span>
+                  <h3 class="font-headline-md text-2xl font-bold text-on-surface">ChOA: Chimp Optimization</h3>
+                </div>
+                <span class="font-code-sm text-xs text-tertiary">Khishe &amp; Mosavi, 2020</span>
+              </div>
+              <p class="font-body-md text-sm text-on-surface-variant leading-relaxed">
+                Memodelkan kecerdasan kawanan simpanse dengan pembagian peran sosial: Penyerang ($\alpha$), Penghadang ($\beta$), Pengejar ($\gamma$), dan Penggiring ($\delta$). Menggabungkan fusi posisi rata-rata 4 pemimpin dengan modulasi chaotic map.
+              </p>
+              <div class="grid grid-cols-2 gap-space-sm font-code-sm text-xs">
+                <div class="bg-surface p-space-sm rounded border border-outline-variant/30">
+                  <span class="text-tertiary block">Kasta Sosial:</span>
+                  <span class="font-semibold text-on-surface">Attacker, Barrier, Chaser, Driver</span>
+                </div>
+                <div class="bg-surface p-space-sm rounded border border-outline-variant/30">
+                  <span class="text-tertiary block">Modulasi Dinamis:</span>
+                  <span class="font-semibold text-on-surface">Peluruhan $f$ &amp; Chaotic Map</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between pt-space-xs">
+                <a class="inline-flex items-center gap-space-xs text-secondary font-semibold text-sm hover:underline" href="#choa-chimp">
+                  <span>Pelajari Teori ChOA</span>
+                  <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </a>
+                <a class="inline-flex items-center gap-space-xs px-space-md py-2 rounded bg-secondary text-on-secondary font-label-md text-xs hover:bg-secondary-container hover:text-on-secondary-container transition-colors shadow-sm" href="#interactive-lab" onclick="window.MetaOpt.setAlgorithm('choa')">
+                  <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+                  <span>Buka Simulasi ChOA</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Alur Kerja Pipa Optimasi Kanonikal (6 Langkah) -->
+          <div class="space-y-space-md">
+            <div class="flex items-center justify-between">
+              <h3 class="font-headline-sm text-xl font-bold text-on-surface">Alur Kerja Pipa Algoritma Optimasi (Optimization Workflow)</h3>
+              <span class="font-code-sm text-xs text-tertiary uppercase tracking-wider">Iterative Architecture</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-space-sm">
+              <div class="bg-surface-container-low p-space-md rounded-lg space-y-space-xs border border-outline-variant/30 shadow-sm">
+                <span class="font-code-sm text-xl text-primary font-bold block">01</span>
+                <h4 class="font-title-md text-sm font-semibold text-on-surface">Inisialisasi</h4>
+                <p class="font-body-sm text-xs text-on-surface-variant">Distribusi acak $N$ agen dalam batas pencarian $\mathbf{lb} \le \mathbf{X}_i \le \mathbf{ub}$.</p>
+              </div>
+              <div class="bg-surface-container-low p-space-md rounded-lg space-y-space-xs border border-outline-variant/30 shadow-sm">
+                <span class="font-code-sm text-xl text-primary font-bold block">02</span>
+                <h4 class="font-title-md text-sm font-semibold text-on-surface">Evaluasi</h4>
+                <p class="font-body-sm text-xs text-on-surface-variant">Menghitung nilai fungsi biaya $f(\mathbf{X}_i)$ dan mencatat solusi terbaik $X^*$.</p>
+              </div>
+              <div class="bg-surface-container-low p-space-md rounded-lg space-y-space-xs border border-outline-variant/30 shadow-sm">
+                <span class="font-code-sm text-xl text-primary font-bold block">03</span>
+                <h4 class="font-title-md text-sm font-semibold text-on-surface">Update Posisi</h4>
+                <p class="font-body-sm text-xs text-on-surface-variant">Menerapkan formulasi perpindahan (OOA perburuan atau ChOA 4-peran).</p>
+              </div>
+              <div class="bg-surface-container-low p-space-md rounded-lg space-y-space-xs border border-outline-variant/30 shadow-sm">
+                <span class="font-code-sm text-xl text-primary font-bold block">04</span>
+                <h4 class="font-title-md text-sm font-semibold text-on-surface">Clamping</h4>
+                <p class="font-body-sm text-xs text-on-surface-variant">Memproyeksikan agen yang melanggar batas kembali ke domain valid $\Omega$.</p>
+              </div>
+              <div class="bg-surface-container-low p-space-md rounded-lg space-y-space-xs border border-outline-variant/30 shadow-sm">
+                <span class="font-code-sm text-xl text-primary font-bold block">05</span>
+                <h4 class="font-title-md text-sm font-semibold text-on-surface">Seleksi Elitis</h4>
+                <p class="font-body-sm text-xs text-on-surface-variant">Penggantian serakah hanya jika posisi baru lebih baik ($f(\mathbf{X}^{baru}) &lt; f(\mathbf{X}^{lama})$).</p>
+              </div>
+              <div class="bg-surface-container-low p-space-md rounded-lg space-y-space-xs border border-outline-variant/30 shadow-sm">
+                <span class="font-code-sm text-xl text-primary font-bold block">06</span>
+                <h4 class="font-title-md text-sm font-semibold text-on-surface">Konvergensi</h4>
+                <p class="font-body-sm text-xs text-on-surface-variant">Verifikasi syarat henti iterasi ($t \ge T$) dan mengembalikan $X^*$ optimal.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SECTION 2: OOA IN-DEPTH -->
+      <section class="w-full py-space-xl px-margin-mobile lg:px-margin bg-surface-container-low border-t border-b border-outline-variant/30" id="ooa-osprey">
+        <div class="max-w-7xl mx-auto space-y-space-xl">
+          
+          <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+            <div class="space-y-space-xs max-w-3xl">
+              <div class="inline-flex items-center gap-space-xs px-space-sm py-0.5 rounded bg-primary-fixed text-on-primary-fixed-variant font-label-md text-xs font-semibold">
+                <span>DOKUMENTASI TEORETIS 01</span>
+              </div>
+              <h2 class="font-headline-lg text-3xl lg:text-4xl font-bold text-on-surface">Osprey Optimization Algorithm (OOA)</h2>
+              <p class="font-body-md text-base text-on-surface-variant">
+                Analisis komprehensif algoritma metaheuristik berbasis populasi yang meniru dua strategi berburu burung elang tiram laut (Dehghani, Trojovský, &amp; Trojovská, 2023).
+              </p>
+            </div>
+            <div class="font-code-sm text-xs text-on-surface-variant bg-surface p-space-sm rounded-lg border border-outline-variant/30 shadow-sm">
+              <span>KOMPLEKSITAS WAKTU: </span><span class="font-semibold text-primary">$\mathcal{O}(T \times N \times D)$</span>
+            </div>
+          </div>
+
+          <!-- Widget Interaktif Model Berburu Burung Osprey -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+            <div class="lg:col-span-7 bg-surface p-space-md rounded-xl border border-outline-variant/40 shadow-sm space-y-space-sm">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-space-xs">
+                  <span class="material-symbols-outlined text-primary">flight_takeoff</span>
+                  <h3 class="font-title-md text-base font-bold text-on-surface">Simulator 2D: Perilaku Penyelaman Osprey Menangkap Ikan</h3>
+                </div>
+                <span class="font-code-sm text-xs text-tertiary">CANVAS 2D SIMULATOR</span>
+              </div>
+              <p class="font-body-sm text-xs text-on-surface-variant leading-relaxed">
+                Amati dinamika dua lapisan: Osprey berpatroli di udara, mengidentifikasi kawanan ikan di bawah permukaan air laut, lalu menukik tajam (diving vector) sebelum membawa mangsa kembali ke pantai.
+              </p>
+              <div class="relative w-full h-[300px] rounded-lg overflow-hidden bg-inverse-surface border border-outline-variant/20">
+                <canvas class="w-full h-full block cursor-crosshair" height="300" id="ooaHuntingCanvas" width="600"></canvas>
+                <div class="absolute bottom-2 left-3 bg-inverse-surface/85 backdrop-blur px-space-sm py-1 rounded text-inverse-on-surface font-code-sm text-xs flex items-center gap-space-md">
+                  <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-primary inline-block"></span> Osprey ($X_i$)</span>
+                  <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-400 inline-block"></span> Ikan Laut ($FP_i$)</span>
+                  <span class="text-tertiary hidden sm:inline">Klik canvas laut untuk menambah ikan</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between pt-space-xs font-code-sm text-xs">
+                <button class="px-space-md py-1.5 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-xs transition-colors" id="btnSpawnFish">
+                  Tambah Kawanan Ikan (+4)
+                </button>
+                <span class="text-primary font-semibold" id="ooaSimulationStateText">Ikan Aktif: 5 | Elang Osprey: 8</span>
+              </div>
+            </div>
+
+            <!-- Formulasi Matematis OOA -->
+            <div class="lg:col-span-5 space-y-space-md">
+              <div class="bg-surface p-space-md rounded-xl border border-outline-variant/40 shadow-sm space-y-space-sm">
+                <div class="flex items-center justify-between">
+                  <span class="font-label-md text-xs text-primary font-bold">FASE 1: EKSPLORASI GLOBAL</span>
+                  <span class="px-1.5 py-0.5 rounded bg-surface-container text-tertiary font-code-sm text-xs">Hunting the Fish</span>
+                </div>
+                <p class="font-body-sm text-xs text-on-surface-variant">
+                  Setiap osprey mendeteksi ikan yang direpresentasikan oleh agen berkinerja lebih unggul:
+                </p>
+                <div class="bg-inverse-surface text-inverse-on-surface p-space-md rounded-lg font-code-sm text-xs leading-relaxed">
+                  <div class="text-tertiary font-mono">// Persamaan Perburuan Tahap 1</div>
+                  <div class="text-white my-1 text-sm">
+                    $$x_{i,j}^{P1} = x_{i,j} + r_1 \cdot \left(SF_{i,j} - I \cdot x_{i,j}\right)$$
+                  </div>
+                  <div class="text-stone-300 text-[11px] mt-1">
+                    Dimana $SF_i$ adalah ikan terpilih acak dari $\{X_k \mid f(X_k) < f(X_i)\} \cup \{X^*\}$, $r_1 \in [0, 1]$, dan $I \in \{1, 2\}$ adalah impuls acak untuk lompatan ruang.
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-surface p-space-md rounded-xl border border-outline-variant/40 shadow-sm space-y-space-sm">
+                <div class="flex items-center justify-between">
+                  <span class="font-label-md text-xs text-primary font-bold">FASE 2: EKSPLOITASI LOKAL</span>
+                  <span class="px-1.5 py-0.5 rounded bg-surface-container text-tertiary font-code-sm text-xs">Carrying Fish to Perch</span>
+                </div>
+                <p class="font-body-sm text-xs text-on-surface-variant">
+                  Setelah menangkap ikan, osprey terbang ke sarang pantai, melakukan pencarian intensif:
+                </p>
+                <div class="bg-inverse-surface text-inverse-on-surface p-space-md rounded-lg font-code-sm text-xs leading-relaxed">
+                  <div class="text-tertiary font-mono">// Persamaan Eksploitasi Tahap 2</div>
+                  <div class="text-white my-1 text-sm">
+                    $$x_{i,j}^{P2} = x_{i,j} + \frac{lb_j + r_2 \cdot (ub_j - lb_j)}{t}$$
+                  </div>
+                  <div class="text-stone-300 text-[11px] mt-1">
+                    Faktor $1/t$ menyusutkan radius pencarian seiring pertambahan iterasi, memusatkan konvergensi presisi di sekitar koordinat prima.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Flowchart Interaktif & Pseudocode OOA -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+            <div class="lg:col-span-5 bg-surface p-space-lg rounded-xl border border-outline-variant/40 shadow-sm space-y-space-md">
+              <h3 class="font-title-md text-base font-bold text-on-surface">Flowchart Interaktif Siklus Hidup OOA</h3>
+              <p class="font-body-sm text-xs text-on-surface-variant">Klik tahapan di bawah untuk meninjau aturan matematisnya:</p>
+              <div class="space-y-space-xs font-code-sm text-xs">
+                <div class="cursor-pointer p-space-sm rounded-lg bg-primary-fixed text-on-primary-fixed-variant border-l-4 border-primary transition-all" id="ooa-flow-1" onclick="window.selectOoaStep(1)">
+                  <span class="font-semibold block">1. Pembentukan Matriks Posisi Ikan ($FP_i$)</span>
+                  <span class="text-xs opacity-80">Identifikasi semua solusi $k$ dengan $f(X_k) &lt; f(X_i)$.</span>
+                </div>
+                <div class="cursor-pointer p-space-sm rounded-lg bg-surface-container hover:bg-surface-container-high transition-all" id="ooa-flow-2" onclick="window.selectOoaStep(2)">
+                  <span class="font-semibold block">2. Penyelaman Stokastik Berburu Ikan</span>
+                  <span class="text-xs opacity-80">Hitung $X_i^{P1}$ dengan impuls lompat $I \in \{1, 2\}$.</span>
+                </div>
+                <div class="cursor-pointer p-space-sm rounded-lg bg-surface-container hover:bg-surface-container-high transition-all" id="ooa-flow-3" onclick="window.selectOoaStep(3)">
+                  <span class="font-semibold block">3. Seleksi Elitis Serakah Tahap 1</span>
+                  <span class="text-xs opacity-80">Terima $X_i = X_i^{P1}$ jika dan hanya jika $f(X_i^{P1}) &lt; f(X_i)$.</span>
+                </div>
+                <div class="cursor-pointer p-space-sm rounded-lg bg-surface-container hover:bg-surface-container-high transition-all" id="ooa-flow-4" onclick="window.selectOoaStep(4)">
+                  <span class="font-semibold block">4. Relokasi Sarang Pantai Teredam $1/t$</span>
+                  <span class="text-xs opacity-80">Hitung $X_i^{P2}$ dengan kontraksi perimeter iteratif.</span>
+                </div>
+                <div class="cursor-pointer p-space-sm rounded-lg bg-surface-container hover:bg-surface-container-high transition-all" id="ooa-flow-5" onclick="window.selectOoaStep(5)">
+                  <span class="font-semibold block">5. Seleksi Elitis Tahap 2 &amp; Update $X^*$</span>
+                  <span class="text-xs opacity-80">Finalisasi posisi agen menuju generasi berikutnya.</span>
+                </div>
+              </div>
+              <div class="p-space-sm rounded bg-surface-container-high text-xs text-on-surface leading-relaxed" id="ooaStepDetailBox">
+                <strong>Tahap 1 Terpilih:</strong> Himpunan ikan membentuk lingkungan adaptif. Jika tidak ada agen yang lebih baik, solusi terbaik global $X^*$ otomatis dijadikan target $SF_i$.
+              </div>
+            </div>
+
+            <div class="lg:col-span-7 bg-inverse-surface text-inverse-on-surface p-space-lg rounded-xl shadow-sm space-y-space-sm relative">
+              <div class="flex items-center justify-between border-b border-surface-container-highest/20 pb-space-xs">
+                <div class="flex items-center gap-space-xs">
+                  <span class="material-symbols-outlined text-primary text-[18px]">terminal</span>
+                  <span class="font-code-sm text-xs text-surface-bright font-semibold">Algoritma 1: Pseudocode Osprey Optimization (OOA)</span>
+                </div>
+                <button class="px-space-sm py-1 rounded bg-surface-container-highest/20 hover:bg-surface-container-highest/30 text-surface-bright font-code-sm text-xs transition-colors flex items-center gap-1" id="btnCopyOoa" onclick="window.copyCodeToClipboard('ooaPseudocodeBlock', 'btnCopyOoa')">
+                  <span class="material-symbols-outlined text-[14px]">content_copy</span>
+                  <span>Salin Kode</span>
+                </button>
+              </div>
+              <pre class="font-code-sm text-xs overflow-x-auto text-stone-200 leading-relaxed py-space-sm select-all" id="ooaPseudocodeBlock">Input: Ukuran Populasi N, Iterasi Maksimum T, Batas Pencarian [lb, ub]
+Output: Solusi Terbaik Global X* dan Nilai Biaya f(X*)
+
+1:  Inisialisasi posisi awal X_i ~ U(lb, ub) untuk setiap i = 1, ..., N
+2:  Evaluasi vektor fitness F_i = f(X_i); tentukan solusi terbaik X*
+3:  for t = 1 to T do
+4:      for i = 1 to N do
+5:          // FASE 1: Identifikasi Posisi Ikan & Penyelaman (Eksplorasi)
+6:          FP_i = { X_k | f(X_k) &lt; f(X_i) } ∪ { X* }
+7:          Pilih target acak SF_i ∈ FP_i
+8:          I = round(1 + rand())  // Faktor impuls stokastik ∈ {1, 2}
+9:          X_i,j^(P1) = X_i,j + rand() * (SF_i,j - I * X_i,j)
+10:         TerapkanClampingBatas(X_i^(P1), lb, ub)
+11:         if f(X_i^(P1)) &lt; f(X_i) then X_i ← X_i^(P1)
+12:
+13:         // FASE 2: Membawa Ikan ke Sarang Pantai (Eksploitasi)
+14:         X_i,j^(P2) = X_i,j + (lb_j + rand() * (ub_j - lb_j)) / t
+15:         TerapkanClampingBatas(X_i^(P2), lb, ub)
+16:         if f(X_i^(P2)) &lt; f(X_i) then X_i ← X_i^(P2)
+17:     end for
+18:     Perbarui solusi terbaik global X* ← argmin f(X)
+19: end for
+20: return X*, f(X*)</pre>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SECTION 3: ChOA IN-DEPTH -->
+      <section class="w-full py-space-xl px-margin-mobile lg:px-margin bg-surface" id="choa-chimp">
+        <div class="max-w-7xl mx-auto space-y-space-xl">
+          
+          <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+            <div class="space-y-space-xs max-w-3xl">
+              <div class="inline-flex items-center gap-space-xs px-space-sm py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-md text-xs font-semibold">
+                <span>DOKUMENTASI TEORETIS 02</span>
+              </div>
+              <h2 class="font-headline-lg text-3xl lg:text-4xl font-bold text-on-surface">Chimp Optimization Algorithm (ChOA)</h2>
+              <p class="font-body-md text-base text-on-surface-variant">
+                Formulasi matematis dinamika sosial dan koordinasi berburu multi-agen terinspirasi oleh perilaku kawanan simpanse (Khishe &amp; Mosavi, 2020).
+              </p>
+            </div>
+            <div class="font-code-sm text-xs text-on-surface-variant bg-surface-container-low p-space-sm rounded-lg border border-outline-variant/30 shadow-sm">
+              <span>PARADIGMA: </span><span class="font-semibold text-secondary">FISSION-FUSION PACK HIERARCHY</span>
+            </div>
+          </div>
+
+          <!-- 4 Kasta Sosial Simpanse -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+            <div class="bg-surface-container-low p-space-md rounded-lg space-y-space-xs border-t-4 border-primary border-outline-variant/30 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="font-code-sm text-2xl text-primary font-bold">α</span>
+                <span class="font-label-md text-xs uppercase tracking-wider text-on-surface-variant font-semibold">Peringkat 1</span>
+              </div>
+              <h3 class="font-title-md text-base font-bold text-on-surface">The Attacker (Penyerang)</h3>
+              <p class="font-body-sm text-xs text-on-surface-variant leading-relaxed">
+                Pemimpin elit dengan biaya objektif terendah. Mengarahkan koordinat serangan utama langsung ke posisi mangsa estimasi.
+              </p>
+            </div>
+
+            <div class="bg-surface-container-low p-space-md rounded-lg space-y-space-xs border-t-4 border-primary-container border-outline-variant/30 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="font-code-sm text-2xl text-primary-container font-bold">β</span>
+                <span class="font-label-md text-xs uppercase tracking-wider text-on-surface-variant font-semibold">Peringkat 2</span>
+              </div>
+              <h3 class="font-title-md text-base font-bold text-on-surface">The Barrier (Penghadang)</h3>
+              <p class="font-body-sm text-xs text-on-surface-variant leading-relaxed">
+                Kandidat terbaik kedua. Memposisikan diri memotong jalur pelarian mangsa di kanopi hutan, menutup celah diversifikasi ruang.
+              </p>
+            </div>
+
+            <div class="bg-surface-container-low p-space-md rounded-lg space-y-space-xs border-t-4 border-secondary border-outline-variant/30 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="font-code-sm text-2xl text-secondary font-bold">γ</span>
+                <span class="font-label-md text-xs uppercase tracking-wider text-on-surface-variant font-semibold">Peringkat 3</span>
+              </div>
+              <h3 class="font-title-md text-base font-bold text-on-surface">The Chaser (Pengejar)</h3>
+              <p class="font-body-sm text-xs text-on-surface-variant leading-relaxed">
+                Kandidat terbaik ketiga. Melakukan pengejaran berkecepatan tinggi di belakang mangsa untuk menggiringnya masuk ke perangkap.
+              </p>
+            </div>
+
+            <div class="bg-surface-container-low p-space-md rounded-lg space-y-space-xs border-t-4 border-tertiary border-outline-variant/30 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="font-code-sm text-2xl text-tertiary font-bold">δ</span>
+                <span class="font-label-md text-xs uppercase tracking-wider text-on-surface-variant font-semibold">Peringkat 4</span>
+              </div>
+              <h3 class="font-title-md text-base font-bold text-on-surface">The Driver (Penggiring)</h3>
+              <p class="font-body-sm text-xs text-on-surface-variant leading-relaxed">
+                Kandidat terbaik keempat. Berpatroli di koridor bawah, mengarahkan mangsa menuju zona sergap penyerang dan penghadang.
+              </p>
+            </div>
+          </div>
+
+          <!-- Widget Interaktif Simpanse & Formulasi Vektor -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+            <div class="lg:col-span-7 bg-surface-container-low p-space-md rounded-xl border border-outline-variant/40 shadow-sm space-y-space-sm">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-space-xs">
+                  <span class="material-symbols-outlined text-secondary">psychology</span>
+                  <h3 class="font-title-md text-base font-bold text-on-surface">Model Konvergensi Vektor 4-Peran Simpanse</h3>
+                </div>
+                <span class="font-code-sm text-xs text-tertiary">SOCIAL DYNAMICS</span>
+              </div>
+              <p class="font-body-sm text-xs text-on-surface-variant leading-relaxed">
+                Demonstrasi interaktif bagaimana simpanse biasa menghitung perpindahan posisi relatif terhadap sentroid poligon yang dibentuk oleh $\alpha$, $\beta$, $\gamma$, dan $\delta$.
+              </p>
+              <div class="relative w-full h-[300px] rounded-lg overflow-hidden bg-inverse-surface border border-outline-variant/20">
+                <canvas class="w-full h-full block cursor-crosshair" height="300" id="choaRoleCanvas" width="600"></canvas>
+                <div class="absolute bottom-2 left-3 bg-inverse-surface/85 backdrop-blur px-space-sm py-1 rounded text-inverse-on-surface font-code-sm text-xs flex items-center gap-space-md flex-wrap">
+                  <span class="text-primary font-semibold">● α (Attacker)</span>
+                  <span class="text-primary-container font-semibold">● β (Barrier)</span>
+                  <span class="text-secondary font-semibold">● γ (Chaser)</span>
+                  <span class="text-stone-300 font-semibold">● δ (Driver)</span>
+                  <span class="text-amber-400 font-semibold">● Sentroid</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between pt-space-xs font-code-sm text-xs">
+                <button class="px-space-md py-1.5 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-xs transition-colors" id="btnPulseChoaRoles">
+                  Pemicu Denyut Peran Acak
+                </button>
+                <span class="text-secondary font-semibold">Kohesi Formasi: 4 Pemimpin Aktif</span>
+              </div>
+            </div>
+
+            <!-- Formulasi Matematis ChOA -->
+            <div class="lg:col-span-5 space-y-space-md">
+              <div class="bg-surface-container-low p-space-md rounded-xl border border-outline-variant/40 shadow-sm space-y-space-sm">
+                <span class="font-label-md text-xs text-secondary font-bold">PENGURUNGAN MANGSA (ENCIRCLEMENT)</span>
+                <p class="font-body-sm text-xs text-on-surface-variant">
+                  Jarak metrik dan perpindahan dihitung untuk tiap peran $j \in \{\alpha, \beta, \gamma, \delta\}$:
+                </p>
+                <div class="bg-inverse-surface text-inverse-on-surface p-space-md rounded-lg font-code-sm text-xs leading-relaxed">
+                  <div class="text-white">
+                    $$d_j = |c \cdot X_j - m \cdot X_i|, \quad X_j' = X_j - a \cdot d_j$$
+                  </div>
+                  <div class="text-stone-300 text-[11px] mt-1">
+                    Dimana $a = 2f \cdot r_1 - f$ meluruh dengan $f = 2.5 - (2.0t / T)$, $c = 2r_2$, dan $m$ adalah koefisien peta chaos.
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-surface-container-low p-space-md rounded-xl border border-outline-variant/40 shadow-sm space-y-space-sm">
+                <span class="font-label-md text-xs text-secondary font-bold">FUSI SENTROID 4-VEKTOR</span>
+                <p class="font-body-sm text-xs text-on-surface-variant">
+                  Kombinasi rata-rata dari keempat vektor kepemimpinan:
+                </p>
+                <div class="bg-inverse-surface text-inverse-on-surface p-space-md rounded-lg font-code-sm text-xs leading-relaxed">
+                  <div class="text-white">
+                    $$X_i(t+1) = \frac{X_1 + X_2 + X_3 + X_4}{4}$$
+                  </div>
+                  <div class="text-stone-300 text-[11px] mt-1">
+                    Jika probabilitas uji strategi acak memenuhi kondisi $\mu \ge 0.5$, agen mengeksekusi chaotic drive untuk mencegah jebakan lokal.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Flowchart & Pseudocode ChOA -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+            <div class="lg:col-span-5 bg-surface-container-low p-space-lg rounded-xl border border-outline-variant/40 shadow-sm space-y-space-md">
+              <h3 class="font-title-md text-base font-bold text-on-surface">Flowchart Interaktif Prosedur ChOA</h3>
+              <p class="font-body-sm text-xs text-on-surface-variant">Klik tahapan berikut untuk meninjau detail implementasi:</p>
+              <div class="space-y-space-xs font-code-sm text-xs">
+                <div class="cursor-pointer p-space-sm rounded-lg bg-secondary-container text-on-secondary-container border-l-4 border-secondary transition-all" id="choa-flow-1" onclick="window.selectChoaStep(1)">
+                  <span class="font-semibold block">1. Evaluasi &amp; Penentuan Peran Sosial</span>
+                  <span class="text-xs opacity-80">Identifikasi $\alpha$ (terbaik), $\beta$, $\gamma$, dan $\delta$.</span>
+                </div>
+                <div class="cursor-pointer p-space-sm rounded-lg bg-surface-container hover:bg-surface-container-high transition-all" id="choa-flow-2" onclick="window.selectChoaStep(2)">
+                  <span class="font-semibold block">2. Perhitungan Jarak Pengurungan Mangsa</span>
+                  <span class="text-xs opacity-80">Hitung $d_\alpha, d_\beta, d_\gamma, d_\delta$ dengan peluruhan $f$.</span>
+                </div>
+                <div class="cursor-pointer p-space-sm rounded-lg bg-surface-container hover:bg-surface-container-high transition-all" id="choa-flow-3" onclick="window.selectChoaStep(3)">
+                  <span class="font-semibold block">3. Sintesis Fusi Sentroid Kuadran</span>
+                  <span class="text-xs opacity-80">Rata-rata 4 vektor: $(X_1+X_2+X_3+X_4)/4$.</span>
+                </div>
+                <div class="cursor-pointer p-space-sm rounded-lg bg-surface-container hover:bg-surface-container-high transition-all" id="choa-flow-4" onclick="window.selectChoaStep(4)">
+                  <span class="font-semibold block">4. Percabangan Chaotic Hunting Drive</span>
+                  <span class="text-xs opacity-80">Perturbasi chaos non-linear jika kondisi acak terpenuhi.</span>
+                </div>
+                <div class="cursor-pointer p-space-sm rounded-lg bg-surface-container hover:bg-surface-container-high transition-all" id="choa-flow-5" onclick="window.selectChoaStep(5)">
+                  <span class="font-semibold block">5. Penegakan Batas &amp; Pembaruan Kasta</span>
+                  <span class="text-xs opacity-80">Clamping dan pembaruan ranking untuk iterasi baru.</span>
+                </div>
+              </div>
+              <div class="p-space-sm rounded bg-surface-container text-xs text-on-surface leading-relaxed" id="choaStepDetailBox">
+                <strong>Tahap 1 Terpilih:</strong> Populasi diurutkan secara menaik berdasarkan nilai evaluasi fungsi objektif untuk menetapkan empat agen pemimpin sosial.
+              </div>
+            </div>
+
+            <div class="lg:col-span-7 bg-inverse-surface text-inverse-on-surface p-space-lg rounded-xl shadow-sm space-y-space-sm relative">
+              <div class="flex items-center justify-between border-b border-surface-container-highest/20 pb-space-xs">
+                <div class="flex items-center gap-space-xs">
+                  <span class="material-symbols-outlined text-secondary text-[18px]">terminal</span>
+                  <span class="font-code-sm text-xs text-surface-bright font-semibold">Algoritma 2: Pseudocode Chimp Optimization (ChOA)</span>
+                </div>
+                <button class="px-space-sm py-1 rounded bg-surface-container-highest/20 hover:bg-surface-container-highest/30 text-surface-bright font-code-sm text-xs transition-colors flex items-center gap-1" id="btnCopyChoa" onclick="window.copyCodeToClipboard('choaPseudocodeBlock', 'btnCopyChoa')">
+                  <span class="material-symbols-outlined text-[14px]">content_copy</span>
+                  <span>Salin Kode</span>
+                </button>
+              </div>
+              <pre class="font-code-sm text-xs overflow-x-auto text-stone-200 leading-relaxed py-space-sm select-all" id="choaPseudocodeBlock">Input: Ukuran Kawanan Simpanse N, Iterasi Maksimum T, Batas [lb, ub]
+Output: Posisi Attacker X_alpha dan Nilai Biaya f(X_alpha)
+
+1:  Inisialisasi populasi simpanse X_i ~ U(lb, ub) untuk i = 1, ..., N
+2:  Evaluasi f(X_i); tetapkan 4 peran elit: X_alpha, X_beta, X_gamma, X_delta
+3:  for t = 1 to T do
+4:      f_decay = 2.5 - (2.0 * t / T)  // Faktor peluruhan dinamis
+5:      for i = 1 to N do
+6:          if rand() &lt; 0.5 then
+7:              // Mekanisme Pengurungan &amp; Serangan Kooperatif
+8:              d_alpha = |c1 * X_alpha - m1 * X_i|,  X1 = X_alpha - a1 * d_alpha
+9:              d_beta  = |c2 * X_beta  - m2 * X_i|,  X2 = X_beta  - a2 * d_beta
+10:             d_gamma = |c3 * X_gamma - m3 * X_i|,  X3 = X_gamma - a3 * d_gamma
+11:             d_delta = |c4 * X_delta - m4 * X_i|,  X4 = X_delta - a4 * d_delta
+12:             X_i(t+1) = (X1 + X2 + X3 + X4) / 4
+13:         else
+14:             // Gerakan Perturbasi Chaotic Map
+15:             X_i(t+1) = lb + ChaoticValue() * (ub - lb)
+16:         end if
+17:         TerapkanClampingBatas(X_i(t+1), lb, ub)
+18:         Evaluasi f(X_i(t+1))
+19:     end for
+20:     Perbarui peringkat elit: X_alpha, X_beta, X_gamma, X_delta
+21: end for
+22: return X_alpha, f(X_alpha)</pre>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SECTION 4: THE INTERACTIVE LAB (MAIN ENGINE) -->
+      <section class="w-full py-space-xl px-margin-mobile lg:px-margin bg-surface-container-low border-t border-b border-outline-variant/30" id="interactive-lab">
+        <div class="max-w-7xl mx-auto space-y-space-lg">
+          
+          <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+            <div class="space-y-space-xs">
+              <div class="inline-flex items-center gap-space-xs px-space-sm py-0.5 rounded bg-primary text-on-primary font-label-md text-xs font-semibold">
+                <span class="material-symbols-outlined text-[16px]">science</span>
+                <span>SIMULATION LABORATORY KERNEL</span>
+              </div>
+              <h2 class="font-headline-lg text-3xl lg:text-4xl font-bold text-on-surface">Laboratorium Simulasi Interaktif</h2>
+              <p class="font-body-md text-sm text-on-surface-variant">
+                Eksperimen numerik langsung di peramban web pada lanskap fungsi uji 2D dengan visualisasi topologi kontur real-time.
+              </p>
+            </div>
+
+            <!-- Algorithm Tab Switcher -->
+            <div class="flex items-center gap-space-xs bg-surface p-1 rounded-lg border border-outline-variant/30 shadow-sm">
+              <button class="px-space-md py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-xs transition-all shadow-sm" id="tabChooseOoa">
+                OOA (Osprey)
+              </button>
+              <button class="px-space-md py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface font-label-md text-xs transition-all" id="tabChooseChoa">
+                ChOA (Chimp)
+              </button>
+            </div>
+          </div>
+
+          <!-- Controls Dashboard Panel -->
+          <div class="bg-surface p-space-lg rounded-xl border border-outline-variant/40 shadow-sm space-y-space-md">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-space-md">
+              
+              <!-- Benchmark Selector -->
+              <div class="space-y-space-xs">
+                <label class="font-label-md text-xs uppercase tracking-wider text-on-surface-variant font-semibold block" for="selFunction">Fungsi Uji (Benchmark)</label>
+                <select class="w-full px-space-sm py-2 rounded bg-surface-container text-on-surface font-code-sm text-xs border border-outline-variant/30 focus:outline-none focus:ring-1 focus:ring-primary" id="selFunction">
+                  <option value="sphere">Sphere (Unimodal, Mangkuk Halus)</option>
+                  <option value="rastrigin">Rastrigin (Multimodal, Gelombang Sinus)</option>
+                  <option value="rosenbrock">Rosenbrock (Lembah Curam Berliku)</option>
+                  <option value="ackley">Ackley (Kawah Curam Multi-Riak)</option>
+                </select>
+              </div>
+
+              <!-- Ukuran Populasi (N) -->
+              <div class="space-y-space-xs">
+                <div class="flex justify-between items-center">
+                  <label class="font-label-md text-xs uppercase tracking-wider text-on-surface-variant font-semibold" for="rngPopSize">Populasi (N)</label>
+                  <span class="font-code-sm text-xs text-primary font-bold" id="lblPopSize">30</span>
+                </div>
+                <input class="w-full accent-primary cursor-pointer" id="rngPopSize" max="100" min="10" step="5" type="range" value="30"/>
+              </div>
+
+              <!-- Iterasi Maksimum (T) -->
+              <div class="space-y-space-xs">
+                <div class="flex justify-between items-center">
+                  <label class="font-label-md text-xs uppercase tracking-wider text-on-surface-variant font-semibold" for="rngMaxIter">Iterasi Maks (T)</label>
+                  <span class="font-code-sm text-xs text-primary font-bold" id="lblMaxIter">50</span>
+                </div>
+                <input class="w-full accent-primary cursor-pointer" id="rngMaxIter" max="150" min="20" step="10" type="range" value="50"/>
+              </div>
+
+              <!-- Kecepatan Animasi -->
+              <div class="space-y-space-xs">
+                <div class="flex justify-between items-center">
+                  <label class="font-label-md text-xs uppercase tracking-wider text-on-surface-variant font-semibold" for="rngSpeed">Jeda Langkah</label>
+                  <span class="font-code-sm text-xs text-primary font-bold" id="lblSpeed">60ms</span>
+                </div>
+                <input class="w-full accent-primary cursor-pointer" id="rngSpeed" max="250" min="10" step="10" type="range" value="60"/>
+              </div>
+
+              <!-- Seed RNG Deterministik -->
+              <div class="space-y-space-xs">
+                <label class="font-label-md text-xs uppercase tracking-wider text-on-surface-variant font-semibold block" for="inpSeed">RNG Seed</label>
+                <div class="flex items-center gap-space-xs">
+                  <input class="w-full px-space-sm py-2 rounded bg-surface-container text-on-surface font-code-sm text-xs border border-outline-variant/30 focus:outline-none focus:ring-1 focus:ring-primary" id="inpSeed" type="number" value="42"/>
+                  <button class="p-2 rounded bg-surface-container hover:bg-surface-container-high text-on-surface-variant transition-colors border border-outline-variant/30" id="btnRandomSeed" title="Acak seed">
+                    <span class="material-symbols-outlined text-[18px]">casino</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Tombol Aksi Simulasi -->
+            <div class="flex flex-wrap items-center justify-between gap-space-sm pt-space-xs border-t border-outline-variant/20">
+              <div class="flex items-center gap-space-sm">
+                <button class="inline-flex items-center gap-space-xs px-space-lg py-2 rounded bg-primary text-on-primary font-label-md text-xs font-semibold hover:bg-primary-container transition-all shadow-sm" id="btnPlay">
+                  <span class="material-symbols-outlined text-[18px]" id="playIcon">play_arrow</span>
+                  <span id="playText">Jalankan Simulasi</span>
+                </button>
+                <button class="inline-flex items-center gap-space-xs px-space-md py-2 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-xs transition-colors border border-outline-variant/30" id="btnStep">
+                  <span class="material-symbols-outlined text-[18px]">skip_next</span>
+                  <span>Langkah (Step)</span>
+                </button>
+                <button class="inline-flex items-center gap-space-xs px-space-md py-2 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-xs transition-colors border border-outline-variant/30" id="btnReset">
+                  <span class="material-symbols-outlined text-[18px]">restart_alt</span>
+                  <span>Reset Ulang</span>
+                </button>
+              </div>
+
+              <!-- Status LED -->
+              <div class="flex items-center gap-space-md font-code-sm text-xs">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-tertiary" id="statusLed"></span>
+                  <span id="statusMessage">Engine Siap</span>
+                </div>
+                <span class="text-tertiary">|</span>
+                <span class="text-primary font-semibold" id="activeAlgoBadge">AKTIF: OOA (Osprey)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Workspace Visualisasi: Peta Kontur + Metrik Real-time + Kurva Konvergensi -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+            
+            <!-- Peta Kontur 2D Topologi (7 Kolom) -->
+            <div class="lg:col-span-7 bg-surface p-space-md rounded-xl border border-outline-variant/40 shadow-sm space-y-space-sm">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-space-xs">
+                  <span class="material-symbols-outlined text-primary">grain</span>
+                  <h3 class="font-title-md text-base font-bold text-on-surface">Topologi 2D &amp; Koordinat Agen</h3>
+                </div>
+                <span class="font-code-sm text-xs text-tertiary" id="landscapeDomainLabel">Domain: [-5.12, 5.12]²</span>
+              </div>
+
+              <div class="relative w-full aspect-[5/4] max-h-[460px] rounded-lg overflow-hidden bg-surface-container border border-outline-variant/20">
+                <canvas class="w-full h-full block" height="480" id="contourCanvas" width="600"></canvas>
+                
+                <!-- Floating Legend -->
+                <div class="absolute top-3 left-3 bg-surface/90 backdrop-blur px-space-sm py-1 rounded shadow-sm font-code-sm text-xs text-on-surface flex items-center gap-space-sm border border-outline-variant/30">
+                  <span class="flex items-center gap-1">
+                    <span class="w-2.5 h-2.5 rounded-full bg-primary inline-block" id="agentLegendColor"></span>
+                    <span>Agen ($N$)</span>
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-amber-500 text-[14px]">star</span>
+                    <span>Best ($X^*$)</span>
+                  </span>
+                  <span class="flex items-center gap-1 hidden sm:flex">
+                    <span class="w-2.5 h-2.5 rounded-full border border-green-600 border-dashed inline-block"></span>
+                    <span>Optimum</span>
+                  </span>
+                </div>
+
+                <!-- Iteration badge overlay -->
+                <div class="absolute bottom-3 right-3 bg-inverse-surface/85 backdrop-blur text-inverse-on-surface px-space-sm py-1 rounded font-code-sm text-xs">
+                  <span id="overlayIterCount">Iterasi: 0 / 50</span>
+                </div>
+              </div>
+
+              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-on-surface-variant font-code-sm gap-1">
+                <span id="funcFormulaDisplay">f(x) = x₁² + x₂²</span>
+                <span id="funcOptimumDisplay">Global Min: f(0, 0) = 0.0</span>
+              </div>
+            </div>
+
+            <!-- Panel Metrik Telemetri & Chart Konvergensi (5 Kolom) -->
+            <div class="lg:col-span-5 space-y-space-md">
+              
+              <!-- Real-time Telemetry Card -->
+              <div class="bg-surface p-space-md rounded-xl border border-outline-variant/40 shadow-sm space-y-space-sm">
+                <div class="flex items-center justify-between">
+                  <h4 class="font-title-md text-sm font-semibold text-on-surface">Telemetri Real-Time</h4>
+                  <span class="font-code-sm text-xs text-tertiary">FP64 EVAL</span>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="space-y-1">
+                  <div class="flex justify-between font-code-sm text-xs text-on-surface-variant">
+                    <span>KEMAJUAN SIKLUS</span>
+                    <span id="telemetryProgressPct">0%</span>
+                  </div>
+                  <div class="w-full h-2 rounded bg-surface-container overflow-hidden">
+                    <div class="h-full bg-primary transition-all duration-100" id="telemetryProgressBar" style="width: 0%;"></div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-space-xs font-code-sm text-xs pt-space-xs">
+                  <div class="bg-surface-container-low p-space-sm rounded border border-outline-variant/20">
+                    <span class="text-tertiary block">Fitness Terbaik $f(X^*)$:</span>
+                    <span class="font-semibold text-primary text-sm" id="telBestFitness">--</span>
+                  </div>
+                  <div class="bg-surface-container-low p-space-sm rounded border border-outline-variant/20">
+                    <span class="text-tertiary block">Rata-rata Populasi:</span>
+                    <span class="font-semibold text-on-surface" id="telMeanFitness">--</span>
+                  </div>
+                  <div class="bg-surface-container-low p-space-sm rounded border border-outline-variant/20">
+                    <span class="text-tertiary block">Evaluasi Fungsi (NFE):</span>
+                    <span class="font-semibold text-on-surface" id="telNfe">0</span>
+                  </div>
+                  <div class="bg-surface-container-low p-space-sm rounded border border-outline-variant/20">
+                    <span class="text-tertiary block">Koordinat $(x_1, x_2)$:</span>
+                    <span class="font-semibold text-on-surface truncate" id="telBestCoord">(--, --)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Convergence Plot -->
+              <div class="bg-surface p-space-md rounded-xl border border-outline-variant/40 shadow-sm space-y-space-xs">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-primary text-[18px]">show_chart</span>
+                    <h4 class="font-title-md text-sm font-semibold text-on-surface">Lintasan Konvergensi</h4>
+                  </div>
+                  <span class="font-code-sm text-xs text-tertiary">$\log_{10}(f(X^*))$ vs Iterasi</span>
+                </div>
+                <div class="relative w-full h-[180px] rounded bg-inverse-surface overflow-hidden border border-outline-variant/20">
+                  <canvas class="w-full h-full block" height="180" id="convergenceCanvas" width="460"></canvas>
+                </div>
+                <div class="flex justify-between items-center text-tertiary font-code-sm text-[11px] pt-1">
+                  <span>Iterasi: 0</span>
+                  <span>Skala Logaritmik Monotonik</span>
+                  <span>Iterasi: T Maks</span>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SECTION 5: ALGORITHM COMPARISON -->
+      <section class="w-full py-space-xl px-margin-mobile lg:px-margin bg-surface" id="comparison">
+        <div class="max-w-7xl mx-auto space-y-space-lg">
+          
+          <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+            <div class="space-y-space-xs">
+              <div class="inline-flex items-center gap-space-xs px-space-sm py-0.5 rounded bg-surface-container text-tertiary font-label-md text-xs font-semibold">
+                <span>PROTOKOL KOMPARASI BERPASANGAN</span>
+              </div>
+              <h2 class="font-headline-lg text-3xl lg:text-4xl font-bold text-on-surface">Uji Komparasi Sinkron OOA vs ChOA</h2>
+              <p class="font-body-md text-sm text-on-surface-variant">
+                Eksekusi paralel berdampingan di bawah seed acak, batas ruang pencarian, dan anggaran evaluasi fungsi yang identik.
+              </p>
+            </div>
+            <button class="inline-flex items-center gap-space-xs px-space-lg py-2.5 rounded bg-primary text-on-primary font-label-md text-xs font-semibold hover:bg-primary-container transition-all shadow-sm" id="btnRunComparison">
+              <span class="material-symbols-outlined text-[18px]">compare_arrows</span>
+              <span>Jalankan Komparasi Sinkron</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+            <!-- Dual Convergence Canvas Plot (7 Kolom) -->
+            <div class="lg:col-span-7 bg-surface-container-low p-space-md rounded-xl border border-outline-variant/40 shadow-sm space-y-space-sm">
+              <div class="flex items-center justify-between">
+                <h3 class="font-title-md text-base font-bold text-on-surface">Kurva Peluruhan Logaritmik Komparatif</h3>
+                <div class="flex items-center gap-space-md font-code-sm text-xs">
+                  <span class="flex items-center gap-1.5"><span class="w-3 h-1 bg-primary inline-block rounded"></span> OOA (Osprey)</span>
+                  <span class="flex items-center gap-1.5"><span class="w-3 h-1 bg-secondary inline-block rounded"></span> ChOA (Chimp)</span>
+                </div>
+              </div>
+              <div class="w-full h-[260px] bg-inverse-surface rounded-lg overflow-hidden border border-outline-variant/20">
+                <canvas class="w-full h-full block" height="260" id="dualConvergenceCanvas" width="600"></canvas>
+              </div>
+              <p class="font-body-sm text-xs text-on-surface-variant leading-relaxed">
+                Perhatikan perbedaan gradien: OOA menunjukkan penurunan cepat pada fase awal berkat sampling mangsa acak, sedangkan ChOA memberikan penajaman bertahap melalui sentroid 4 kasta sosial.
+              </p>
+            </div>
+
+            <!-- Tabel Metrik Komparasi (5 Kolom) -->
+            <div class="lg:col-span-5 bg-surface-container-low p-space-md rounded-xl border border-outline-variant/40 shadow-sm space-y-space-sm">
+              <h3 class="font-title-md text-base font-bold text-on-surface">Tabel Evaluasi Kinerja Relatif</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left font-code-sm text-xs">
+                  <thead>
+                    <tr class="border-b border-surface-container-highest text-tertiary">
+                      <th class="py-2">Parameter / Metrik</th>
+                      <th class="py-2 text-primary font-bold">OOA</th>
+                      <th class="py-2 text-secondary font-bold">ChOA</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-surface-container-highest/60 text-on-surface">
+                    <tr>
+                      <td class="py-2 font-body-sm text-on-surface-variant">Fitness Terbaik ($f_{best}$)</td>
+                      <td class="py-2 font-semibold text-primary" id="cmpOoaBest">--</td>
+                      <td class="py-2 font-semibold text-secondary" id="cmpChoaBest">--</td>
+                    </tr>
+                    <tr>
+                      <td class="py-2 font-body-sm text-on-surface-variant">Rata-rata Populasi</td>
+                      <td class="py-2" id="cmpOoaMean">--</td>
+                      <td class="py-2" id="cmpChoaMean">--</td>
+                    </tr>
+                    <tr>
+                      <td class="py-2 font-body-sm text-on-surface-variant">Solusi Terburuk ($f_{worst}$)</td>
+                      <td class="py-2" id="cmpOoaWorst">--</td>
+                      <td class="py-2" id="cmpChoaWorst">--</td>
+                    </tr>
+                    <tr>
+                      <td class="py-2 font-body-sm text-on-surface-variant">Standar Deviasi ($\sigma$)</td>
+                      <td class="py-2" id="cmpOoaStd">--</td>
+                      <td class="py-2" id="cmpChoaStd">--</td>
+                    </tr>
+                    <tr>
+                      <td class="py-2 font-body-sm text-on-surface-variant">Total Evaluasi (NFE)</td>
+                      <td class="py-2" id="cmpOoaNfe">--</td>
+                      <td class="py-2" id="cmpChoaNfe">--</td>
+                    </tr>
+                    <tr>
+                      <td class="py-2 font-body-sm text-on-surface-variant">Waktu Komputasi (ms)</td>
+                      <td class="py-2" id="cmpOoaTime">--</td>
+                      <td class="py-2" id="cmpChoaTime">--</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="p-space-sm rounded bg-surface-container text-xs text-on-surface-variant leading-relaxed" id="cmpSummaryAlert">
+                Klik <strong>"Jalankan Komparasi Sinkron"</strong> untuk menghitung trajektori berdampingan pada lanskap fungsi yang dipilih.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SECTION 6: EXPERIMENT LAB & CSV EXPORT -->
+      <section class="w-full py-space-xl px-margin-mobile lg:px-margin bg-surface-container-low border-t border-b border-outline-variant/30" id="experiment">
+        <div class="max-w-7xl mx-auto space-y-space-lg">
+          
+          <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+            <div class="space-y-space-xs">
+              <div class="inline-flex items-center gap-space-xs px-space-sm py-0.5 rounded bg-inverse-surface text-inverse-on-surface font-label-md text-xs font-semibold">
+                <span>UJI STATISTIK MONTE CARLO</span>
+              </div>
+              <h2 class="font-headline-lg text-3xl lg:text-4xl font-bold text-on-surface">Laboratorium Uji Replikasi Statistik</h2>
+              <p class="font-body-md text-sm text-on-surface-variant">
+                Mengeksekusi replikasi batch independen lintas seed acak untuk mengevaluasi signifikansi stabilitas stokastik dan ekspor data CSV standar RFC 4180.
+              </p>
+            </div>
+
+            <!-- Controls: Trials Selector & Action Buttons -->
+            <div class="flex items-center gap-space-sm flex-wrap">
+              <div class="flex items-center gap-space-xs bg-surface p-1 rounded-lg border border-outline-variant/30 shadow-sm font-code-sm text-xs">
+                <span class="text-tertiary px-2">Replikasi:</span>
+                <button class="px-space-sm py-1 rounded bg-primary text-on-primary font-semibold" id="btnTrial5">5</button>
+                <button class="px-space-sm py-1 rounded text-on-surface-variant hover:text-on-surface" id="btnTrial10">10</button>
+                <button class="px-space-sm py-1 rounded text-on-surface-variant hover:text-on-surface" id="btnTrial30">30</button>
+              </div>
+              <button class="inline-flex items-center gap-space-xs px-space-md py-2 rounded bg-inverse-surface text-inverse-on-surface font-label-md text-xs font-semibold hover:bg-surface-container-highest hover:text-on-surface transition-colors shadow-sm" id="btnRunBatch">
+                <span class="material-symbols-outlined text-[18px]">play_circle</span>
+                <span>Jalankan Batch Uji</span>
+              </button>
+              <button class="inline-flex items-center gap-space-xs px-space-md py-2 rounded bg-surface hover:bg-surface-container text-on-surface font-label-md text-xs font-semibold transition-colors border border-outline-variant/30 shadow-sm" id="btnExportCsv">
+                <span class="material-symbols-outlined text-[18px] text-primary">download</span>
+                <span>Unduh Hasil CSV</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Data Table Uji Replikasi -->
+          <div class="bg-surface rounded-xl border border-outline-variant/40 shadow-sm overflow-hidden space-y-space-xs">
+            <div class="p-space-md border-b border-outline-variant/20 flex items-center justify-between">
+              <h3 class="font-title-md text-sm font-semibold text-on-surface">Tabel Hasil Replikasi Eksperimental</h3>
+              <span class="font-code-sm text-xs text-tertiary" id="experimentStatusTag">Uji Siap Dijalankan</span>
+            </div>
+            <div class="max-h-[380px] overflow-y-auto">
+              <table class="w-full text-left font-code-sm text-xs">
+                <thead class="sticky top-0 bg-surface-container-low text-tertiary border-b border-outline-variant/30">
+                  <tr>
+                    <th class="py-2.5 px-4">Trial #</th>
+                    <th class="py-2.5 px-4">Seed</th>
+                    <th class="py-2.5 px-4">Fungsi Uji</th>
+                    <th class="py-2.5 px-4 text-primary font-bold">OOA Best $f(X^*)$</th>
+                    <th class="py-2.5 px-4 text-secondary font-bold">ChOA Best $f(X^*)$</th>
+                    <th class="py-2.5 px-4">Selisih $(\Delta)$</th>
+                    <th class="py-2.5 px-4">Pemenang Uji</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/20" id="trialTableBody">
+                  <tr>
+                    <td class="py-8 text-center text-on-surface-variant font-body-sm" colspan="7">
+                      Klik tombol <strong>"Jalankan Batch Uji"</strong> untuk memproses replikasi stokastik.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SECTION 7: SCIENTIFIC REFERENCES & CITATION -->
+      <section class="w-full py-space-xl px-margin-mobile lg:px-margin bg-surface" id="references">
+        <div class="max-w-7xl mx-auto space-y-space-xl">
+          
+          <div class="space-y-space-xs">
+            <div class="inline-flex items-center gap-space-xs px-space-sm py-0.5 rounded bg-surface-container text-tertiary font-label-md text-xs font-semibold">
+              <span>FONDASI ACADEMIC PEER-REVIEWED</span>
+            </div>
+            <h2 class="font-headline-lg text-3xl lg:text-4xl font-bold text-on-surface">Daftar Pustaka &amp; Sitasi Ilmiah</h2>
+            <p class="font-body-md text-sm text-on-surface-variant">
+              Literatur primer yang memperkenalkan algoritma metaheuristik OOA dan ChOA.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg">
+            
+            <!-- Sitasi OOA -->
+            <div class="bg-surface-container-low p-space-lg rounded-xl border border-outline-variant/40 space-y-space-sm shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="px-space-xs py-0.5 rounded bg-primary-fixed text-on-primary-fixed-variant font-label-md text-xs font-semibold">OOA PRIMARY PAPER</span>
+                <span class="font-code-sm text-xs text-tertiary">DOI: 10.1038/s41598-023-38822-7</span>
+              </div>
+              <h3 class="font-headline-sm text-lg font-bold text-on-surface">
+                Osprey Optimization Algorithm: A new bio-inspired metaheuristic algorithm for solving engineering problems
+              </h3>
+              <p class="font-body-sm text-xs text-on-surface-variant">
+                <strong>Penulis:</strong> Mohammad Dehghani, Pavel Trojovský, &amp; Eva Trojovská<br/>
+                <strong>Jurnal:</strong> <em>Scientific Reports</em> (Nature Portfolio), Vol. 13, Artikel 11281 (2023).
+              </p>
+              <div class="bg-inverse-surface text-inverse-on-surface p-space-sm rounded font-code-sm text-xs select-all overflow-x-auto leading-relaxed">
+@article{dehghani2023osprey,<br/>
+&nbsp;&nbsp;title={Osprey Optimization Algorithm},<br/>
+&nbsp;&nbsp;author={Dehghani, M. and Trojovsk{\'y}, P. and Trojovsk{\'a}, E.},<br/>
+&nbsp;&nbsp;journal={Scientific Reports},<br/>
+&nbsp;&nbsp;volume={13},<br/>
+&nbsp;&nbsp;pages={11281},<br/>
+&nbsp;&nbsp;year={2023},<br/>
+&nbsp;&nbsp;publisher={Nature Publishing Group}<br/>
+}
+              </div>
+            </div>
+
+            <!-- Sitasi ChOA -->
+            <div class="bg-surface-container-low p-space-lg rounded-xl border border-outline-variant/40 space-y-space-sm shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="px-space-xs py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-md text-xs font-semibold">ChOA PRIMARY PAPER</span>
+                <span class="font-code-sm text-xs text-tertiary">DOI: 10.1016/j.eswa.2020.113338</span>
+              </div>
+              <h3 class="font-headline-sm text-lg font-bold text-on-surface">
+                Chimp Optimization Algorithm: A New Nature-Inspired Approach for High-Dimensional Optimization
+              </h3>
+              <p class="font-body-sm text-xs text-on-surface-variant">
+                <strong>Penulis:</strong> M. Khishe &amp; M. R. Mosavi<br/>
+                <strong>Jurnal:</strong> <em>Expert Systems with Applications</em> (Elsevier), Vol. 149, Artikel 113338 (2020).
+              </p>
+              <div class="bg-inverse-surface text-inverse-on-surface p-space-sm rounded font-code-sm text-xs select-all overflow-x-auto leading-relaxed">
+@article{khishe2020chimp,<br/>
+&nbsp;&nbsp;title={Chimp Optimization Algorithm},<br/>
+&nbsp;&nbsp;author={Khishe, M. and Mosavi, M. R.},<br/>
+&nbsp;&nbsp;journal={Expert Systems with Applications},<br/>
+&nbsp;&nbsp;volume={149},<br/>
+&nbsp;&nbsp;pages={113338},<br/>
+&nbsp;&nbsp;year={2020},<br/>
+&nbsp;&nbsp;publisher={Elsevier}<br/>
+}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Tombol Melayang Back to Top -->
+  <button class="fixed bottom-6 right-6 z-40 p-3 rounded-full bg-primary text-on-primary shadow-lg opacity-0 pointer-events-none transition-all duration-300 hover:bg-primary-container" id="btnBackToTop" aria-label="Kembali ke atas">
+    <span class="material-symbols-outlined text-[20px]">arrow_upward</span>
+  </button>
+
+  <!-- Footer Akademik -->
+  <footer class="w-full bg-surface-container-low border-t border-outline-variant/40 py-space-xl mt-space-xl">
+    <div class="max-w-7xl mx-auto px-margin-mobile lg:px-margin">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-space-lg mb-space-lg">
+        
+        <div class="md:col-span-5 space-y-space-sm">
+          <div class="flex items-center gap-space-xs">
+            <span class="font-code-sm text-label-lg tracking-widest text-primary font-bold">META::OPT</span>
+            <span class="font-label-md text-xs text-tertiary">· Seri Monograf Laboratorium Komputasi</span>
+          </div>
+          <p class="font-body-sm text-xs text-on-surface-variant max-w-md leading-relaxed">
+            Lingkungan benchmark komputasi interaktif yang didedikasikan untuk eksplorasi dan perbandingan metaheuristik domain kontinu: Osprey Optimization Algorithm (OOA) dan Chimp Optimization Algorithm (ChOA).
+          </p>
+        </div>
+
+        <div class="md:col-span-4 space-y-space-xs">
+          <div class="font-label-md text-xs uppercase tracking-wider text-on-surface font-bold">Sitasi Modul Web</div>
+          <div class="p-space-sm rounded-lg bg-inverse-surface text-inverse-on-surface font-code-sm text-xs select-all overflow-x-auto leading-relaxed">
+@misc{metaopt_lab2026,<br/>
+&nbsp;&nbsp;title={Interactive Metaheuristic Algorithm Lab: OOA &amp; ChOA},<br/>
+&nbsp;&nbsp;author={Computational Intelligence Laboratory},<br/>
+&nbsp;&nbsp;year={2026},<br/>
+&nbsp;&nbsp;url={https://github.com/dimasptrr/metaheuristik_kelompok-8_kelas-B}<br/>
+}
+          </div>
+        </div>
+
+        <div class="md:col-span-3 space-y-space-xs">
+          <div class="font-label-md text-xs uppercase tracking-wider text-on-surface font-bold">Protokol &amp; Standar</div>
+          <ul class="space-y-1 font-body-sm text-xs text-on-surface-variant">
+            <li>• Fungsi Uji Standar CEC Benchmarks</li>
+            <li>• Standar IEEE Computational Intelligence</li>
+            <li>• Pseudo-RNG Deterministik Seeded</li>
+            <li>• Kompatibel Deployment GitHub Pages</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="pt-space-md border-t border-outline-variant/30 flex flex-col sm:flex-row items-center justify-between gap-space-sm text-on-surface-variant font-code-sm text-xs">
+        <div>© 2026 Metaheuristic Optimization Consortium. Lisensi Akademik Terbuka.</div>
+        <div class="flex items-center gap-space-md">
+          <span>Kernel: v2.4.1-vanilla</span>
+          <span>Presisi: IEEE-754 FP64</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modular Script Execution Pipeline -->
+  <script src="js/benchmarks/functions.js"></script>
+  <script src="js/algorithms/ooa.js"></script>
+  <script src="js/algorithms/choa.js"></script>
+  <script src="js/simulation/engine.js"></script>
+  <script src="js/visualization/canvas.js"></script>
+  <script src="js/visualization/charts.js"></script>
+  <script src="js/experiments/runner.js"></script>
+  <script src="js/navigation.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
+
