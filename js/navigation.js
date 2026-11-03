@@ -1,7 +1,7 @@
 /**
- * NAVIGATION, SCROLL-SPY & INTERACTION HANDLERS
- * Mengelola navigasi mulus, scroll progress, responsive mobile drawer,
- * scroll-spy indikator aktif, dan flowchart step inspector.
+ * NAVIGATION, STAGE-SPY & INTERACTION HANDLERS
+ * Mengelola navigasi stage/modul, scroll progress, responsive mobile drawer,
+ * indikator stage aktif, flowchart step inspector, dan salin pseudocode.
  */
 (function() {
   window.MetaOpt = window.MetaOpt || {};
@@ -16,10 +16,33 @@
     const mobileDrawer = document.getElementById('mobileDrawer');
     const mobileBackdrop = document.getElementById('mobileBackdrop');
 
-    // 1. Smooth Scroll saat tautan navigasi diklik
+    function syncActiveNavLink(activeId) {
+      navLinks.forEach(link => {
+        const p = link.getAttribute('data-path');
+        if (p === activeId) {
+          link.classList.add('bg-primary', 'text-on-primary', 'font-semibold', 'shadow-sm');
+          link.classList.remove('text-on-surface-variant', 'hover:bg-surface-container-high', 'hover:text-on-surface');
+          link.setAttribute('aria-current', 'page');
+        } else {
+          link.classList.remove('bg-primary', 'text-on-primary', 'font-semibold', 'shadow-sm');
+          link.classList.add('text-on-surface-variant', 'hover:bg-surface-container-high', 'hover:text-on-surface');
+          link.removeAttribute('aria-current');
+        }
+      });
+    }
+
+    window.MetaOpt.syncActiveNavLink = syncActiveNavLink;
+
+    // 1. Klik tautan navigasi: arahkan ke Stage Pulau Misi bila aktif, fallback ke scroll
     navLinks.forEach(link => {
       link.addEventListener('click', (e) => {
         const targetId = link.getAttribute('data-path');
+        if (window.MetaOpt.GameMap) {
+          e.preventDefault();
+          closeMobileDrawer();
+          window.MetaOpt.GameMap.tryOpenStageByKey(targetId);
+          return;
+        }
         const targetEl = document.getElementById(targetId);
         if (targetEl) {
           e.preventDefault();
@@ -31,8 +54,6 @@
             top: offsetPos,
             behavior: 'smooth'
           });
-
-          // Tutup mobile drawer jika terbuka
           closeMobileDrawer();
         }
       });
@@ -43,7 +64,6 @@
       if (mobileDrawer && mobileBackdrop) {
         mobileDrawer.classList.remove('translate-x-full');
         mobileBackdrop.classList.remove('hidden');
-        document.body.classList.add('overflow-hidden');
       }
     }
 
@@ -51,7 +71,6 @@
       if (mobileDrawer && mobileBackdrop) {
         mobileDrawer.classList.add('translate-x-full');
         mobileBackdrop.classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
       }
     }
 
@@ -59,13 +78,14 @@
     if (mobileMenuCloseBtn) mobileMenuCloseBtn.addEventListener('click', closeMobileDrawer);
     if (mobileBackdrop) mobileBackdrop.addEventListener('click', closeMobileDrawer);
 
-    // Escape key untuk menutup mobile drawer
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeMobileDrawer();
     });
 
-    // 3. Scroll Progress Indicator & Back to Top & Scroll-Spy
+    // 3. Fallback Scroll-Spy (bila di-scroll pada viewport kecil)
     window.addEventListener('scroll', () => {
+      if (window.MetaOpt.Game) return;
+
       const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
       const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
       const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
@@ -74,7 +94,6 @@
         scrollProgressBar.style.width = scrolled + '%';
       }
 
-      // Tombol Back to Top visibility
       if (btnBackToTop) {
         if (winScroll > 400) {
           btnBackToTop.classList.remove('opacity-0', 'pointer-events-none');
@@ -85,7 +104,6 @@
         }
       }
 
-      // Scroll-Spy Deteksi Bagian Aktif
       let currentSection = 'overview';
       const scrollPos = winScroll + 120;
 
@@ -102,23 +120,20 @@
         }
       }
 
-      // Perbarui style tombol navigasi aktif
-      navLinks.forEach(link => {
-        const p = link.getAttribute('data-path');
-        if (p === currentSection) {
-          link.classList.add('bg-primary', 'text-on-primary', 'font-semibold', 'shadow-sm');
-          link.classList.remove('text-on-surface-variant', 'hover:bg-surface-container-high', 'hover:text-on-surface');
-          link.setAttribute('aria-current', 'page');
-        } else {
-          link.classList.remove('bg-primary', 'text-on-primary', 'font-semibold', 'shadow-sm');
-          link.classList.add('text-on-surface-variant', 'hover:bg-surface-container-high', 'hover:text-on-surface');
-          link.removeAttribute('aria-current');
-        }
-      });
+      syncActiveNavLink(currentSection);
     }, { passive: true });
 
     if (btnBackToTop) {
       btnBackToTop.addEventListener('click', () => {
+        const openStageNum = window.MetaOpt.Game && window.MetaOpt.Game.openStageNum;
+        if (openStageNum) {
+          const dlg = document.getElementById(`stage-dialog-${openStageNum}`);
+          const body = dlg ? dlg.querySelector('.stage-modal-body') : null;
+          if (body) {
+            body.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+          }
+        }
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     }
@@ -214,4 +229,3 @@
 
   document.addEventListener('DOMContentLoaded', initNavigation);
 })();
-

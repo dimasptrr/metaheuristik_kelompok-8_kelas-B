@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>Laboratorium Optimasi Metaheuristik: OOA &amp; ChOA</title>
+  <title>Pulau Misi — Laboratorium Optimasi Metaheuristik: OOA &amp; ChOA</title>
   
   <!-- Google Fonts: Inter (Body), Newsreader (Serif Display & Headings), Space Grotesk (Academic Mono/Labels) -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -76,82 +76,532 @@
     };
   </script>
 
-  <!-- Custom Stylesheet -->
+
+  <!-- Custom Stylesheets (Academic + Pulau Misi Gamification) -->
   <link rel="stylesheet" href="css/styles.css"/>
+  <link rel="stylesheet" href="css/game.css"/>
 </head>
-<body class="bg-surface font-body-md text-on-surface antialiased min-h-screen flex flex-col selection:bg-primary-fixed selection:text-on-primary-fixed-variant">
+<body class="game-mode-active font-body-md text-on-surface antialiased min-h-screen flex flex-col selection:bg-primary-fixed selection:text-on-primary-fixed-variant">
 
-  <!-- Scroll Progress Indicator Bar -->
-  <div class="fixed top-0 left-0 h-1 bg-primary z-[60] transition-all duration-75" id="scrollProgressBar" style="width: 0%;"></div>
+  <!-- Skip link untuk aksesibilitas keyboard -->
+  <a href="#islandMainHeading" class="visually-hidden bg-inverse-surface text-white px-4 py-2 rounded z-[100]">Lewati ke Peta Pulau Misi</a>
 
-  <!-- Header & Navigasi Akademik -->
-  <header class="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-md border-b border-outline-variant/40 shadow-[0_1px_8px_rgba(0,0,0,0.03)]">
-    <div class="h-20 w-full max-w-7xl mx-auto px-margin-mobile lg:px-margin flex items-center justify-between gap-space-md">
-      
-      <!-- Brand Logo -->
-      <div class="flex items-center gap-space-md shrink-0">
-        <a class="flex items-center gap-space-sm group" data-path="overview" href="#overview">
-          <span class="font-code-sm text-label-lg tracking-widest text-primary font-bold">META::OPT</span>
-          <span class="font-headline-sm text-lg text-on-surface border-l pl-space-sm ml-space-xs border-outline-variant hidden sm:inline-block">Symposium Lab</span>
-        </a>
-        <div class="hidden xl:flex items-center gap-space-xs px-space-sm py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant border border-outline-variant">
-          <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-          <span class="font-code-sm text-xs uppercase tracking-wider">Engine: Client-Side FP64</span>
+  <!-- Indikator Progres Global / Stage Scroll -->
+  <div class="fixed top-0 left-0 h-1 bg-amber-400 z-[70] transition-all duration-150" id="scrollProgressBar" style="width: 0%;"></div>
+
+  <!-- GAME SHELL: HUD + PETA PULAU ISOMETRIK + DOCK BRIEFING -->
+  <div id="gameShell">
+
+    <!-- HEADER GAME HUD -->
+    <header class="game-hud">
+      <div class="game-hud-inner">
+        <!-- Brand & Identitas Pulau -->
+        <div class="hud-brand">
+          <span class="hud-logo-pill">META::OPT</span>
+          <div class="hud-world-title">
+            <h1 class="hud-world-name" id="islandMainHeading" tabindex="-1">Pulau Misi Metaheuristik</h1>
+            <span class="hud-world-sub hidden lg:inline">OOA &amp; ChOA • Client-Side FP64 Expedition</span>
+          </div>
+        </div>
+
+        <!-- Hidden desktopNav to maintain 100% DOM backward-compatibility without cluttering the HUD -->
+        <nav class="hidden" id="desktopNav" aria-hidden="true">
+          <a data-path="overview" href="#overview">1. Base</a>
+          <a data-path="ooa-osprey" href="#ooa-osprey">2. OOA</a>
+          <a data-path="choa-chimp" href="#choa-chimp">3. ChOA</a>
+          <a data-path="interactive-lab" href="#interactive-lab">4. Lab</a>
+          <a data-path="comparison" href="#comparison">5. Duel</a>
+          <a data-path="experiment" href="#experiment">6. Statistik</a>
+          <a data-path="references" href="#references">7. Pustaka</a>
+        </nav>
+
+        <!-- Statistik Pemain & Kontrol Utilitas Cepat -->
+        <div class="hud-stats">
+          <div class="hud-xp-box" title="Progres XP Eksplorasi">
+            <span class="hud-level-badge" id="hudLevelBadge">LV.1</span>
+            <div class="hud-xp-bar-wrap">
+              <div class="hud-xp-labels">
+                <span class="hidden md:inline" id="hudRankTitle">Kadet Eksplorasi</span>
+                <span id="hudXpText">0 XP</span>
+              </div>
+              <div class="hud-xp-track">
+                <div class="hud-xp-fill" id="hudXpFill" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" class="hud-btn hud-btn-badges" id="btnOpenBadges" title="Buka Koleksi Badge">
+            <span aria-hidden="true">🏅</span>
+            <span id="hudBadgeCount">0/7 Badge</span>
+          </button>
+
+          <button type="button" class="hud-btn" id="btnTogglePresentation" aria-pressed="false" title="Buka kunci semua stage untuk presentasi kelas">
+            <span aria-hidden="true" id="presLockIcon">🔓</span>
+            <span class="pres-label hidden xl:inline">Mode Presentasi</span>
+          </button>
+
+          <div class="hud-ctrl-group">
+            <button type="button" class="hud-btn hud-btn-icon" id="btnToggleMusic" aria-pressed="false" aria-label="Putar musik petualang mellow" title="Musik Petualang Mellow (BGM)">
+              <span aria-hidden="true" id="hudMusicIcon">🎵</span>
+              <span class="hud-music-label sr-only" id="hudMusicLabel">Musik: Off</span>
+            </button>
+
+            <button type="button" class="hud-btn hud-btn-icon" id="btnToggleSound" aria-pressed="false" aria-label="Aktifkan efek suara" title="Efek Suara Taktil (SFX)">
+              <span aria-hidden="true" id="hudSoundIcon">🔇</span>
+            </button>
+
+            <button type="button" class="hud-btn hud-btn-icon" id="btnResetGameProgress" aria-label="Reset progres permainan" title="Reset Progres XP dan Badge">
+              <span aria-hidden="true">↺</span>
+            </button>
+
+            <button type="button" class="hud-btn hud-btn-icon" id="mobileMenuBtn" aria-label="Buka daftar modul" title="Daftar Modul Stage">
+              <span aria-hidden="true">☰</span>
+            </button>
+          </div>
         </div>
       </div>
+    </header>
 
-      <!-- Desktop Navigation Links -->
-      <nav class="hidden lg:flex items-center gap-1" id="desktopNav">
-        <a class="px-space-sm py-1.5 rounded-lg text-on-surface-variant font-label-md text-sm hover:bg-surface-container-high hover:text-on-surface transition-all bg-primary text-on-primary font-semibold shadow-sm" data-path="overview" href="#overview">Overview</a>
-        <a class="px-space-sm py-1.5 rounded-lg text-on-surface-variant font-label-md text-sm hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="ooa-osprey" href="#ooa-osprey">OOA (Osprey)</a>
-        <a class="px-space-sm py-1.5 rounded-lg text-on-surface-variant font-label-md text-sm hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="choa-chimp" href="#choa-chimp">ChOA (Chimp)</a>
-        <a class="px-space-sm py-1.5 rounded-lg text-on-surface-variant font-label-md text-sm hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="interactive-lab" href="#interactive-lab">Interactive Lab</a>
-        <a class="px-space-sm py-1.5 rounded-lg text-on-surface-variant font-label-md text-sm hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="comparison" href="#comparison">Perbandingan</a>
-        <a class="px-space-sm py-1.5 rounded-lg text-on-surface-variant font-label-md text-sm hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="experiment" href="#experiment">Eksperimen</a>
-        <a class="px-space-sm py-1.5 rounded-lg text-on-surface-variant font-label-md text-sm hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="references" href="#references">Referensi</a>
-      </nav>
+    <!-- DRAWER DAFTAR MODUL (Kompatibel dengan navigation.js) -->
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden transition-opacity" id="mobileBackdrop"></div>
+    <nav class="fixed top-0 right-0 bottom-0 w-72 bg-surface z-50 translate-x-full shadow-2xl flex flex-col p-space-md" id="mobileDrawer" aria-label="Daftar Modul Pulau">
+      <div class="flex items-center justify-between pb-space-sm border-b border-outline-variant">
+        <span class="font-code-sm font-bold text-primary">PETA STAGE MODUL</span>
+        <button type="button" class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant" id="mobileMenuCloseBtn" aria-label="Tutup menu">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="flex flex-col gap-1 py-space-md flex-1 overflow-y-auto font-label-md text-sm">
+        <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="overview" href="#overview">1. Base Camp: Overview</a>
+        <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="ooa-osprey" href="#ooa-osprey">2. Danau Osprey (OOA)</a>
+        <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="choa-chimp" href="#choa-chimp">3. Hutan Simpanse (ChOA)</a>
+        <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="interactive-lab" href="#interactive-lab">4. Lab Pulau Interaktif</a>
+        <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="comparison" href="#comparison">5. Arena Duel OOA vs ChOA</a>
+        <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="experiment" href="#experiment">6. Ruang Statistik Monte Carlo</a>
+        <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="references" href="#references">7. Perpustakaan &amp; Sitasi</a>
+      </div>
+      <div class="pt-space-sm border-t border-outline-variant text-xs font-code-sm text-tertiary">
+        <span>IEEE-754 FP64 Client-Side Engine</span>
+      </div>
+    </nav>
 
-      <!-- Action Buttons & Mobile Hamburger -->
-      <div class="flex items-center gap-space-sm shrink-0">
-        <a class="hidden sm:inline-flex items-center gap-space-xs px-space-sm py-1.5 rounded-lg bg-surface-container text-on-surface font-label-md text-xs border border-outline-variant hover:bg-surface-container-high transition-colors" href="#references">
-          <span class="material-symbols-outlined text-[16px] text-on-surface-variant">menu_book</span>
-          <span>Monograf</span>
-        </a>
-        <button class="lg:hidden p-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors" id="mobileMenuBtn" aria-label="Buka Navigasi">
-          <span class="material-symbols-outlined text-[22px]">menu</span>
+    <!-- VIEWPORT UTAMA: DIORAMA PULAU ISOMETRIK 3D (INLINE SVG + OVERLAY NODE) -->
+    <main class="island-viewport">
+      <div class="island-stage-canvas" id="islandStageCanvas">
+
+        <!-- Dekorasi Diorama Pulau Isometrik SVG -->
+        <svg id="islandMapSvg" viewBox="0 0 1200 640" aria-hidden="true">
+          <defs>
+            <linearGradient id="islandTopGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#f7f6f2"/>
+              <stop offset="65%" stop-color="#efeee9"/>
+              <stop offset="100%" stop-color="#e3e1da"/>
+            </linearGradient>
+            <linearGradient id="islandCliffGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#b8c3cf"/>
+              <stop offset="50%" stop-color="#d2dbe4"/>
+              <stop offset="100%" stop-color="#98a7b7"/>
+            </linearGradient>
+            <linearGradient id="lakeWaterGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#7fb3d5"/>
+              <stop offset="55%" stop-color="#4889b5"/>
+              <stop offset="100%" stop-color="#2b6491"/>
+            </linearGradient>
+            <linearGradient id="waterfallGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#60a5fa"/>
+              <stop offset="100%" stop-color="#1d4ed8"/>
+            </linearGradient>
+            <linearGradient id="treeFoliageGrad" x1="25%" y1="10%" x2="80%" y2="90%">
+              <stop offset="0%" stop-color="#94be5a"/>
+              <stop offset="55%" stop-color="#5e8c3a"/>
+              <stop offset="100%" stop-color="#3b5e22"/>
+            </linearGradient>
+            <linearGradient id="balloonGrad" x1="20%" y1="15%" x2="85%" y2="90%">
+              <stop offset="0%" stop-color="#f87171"/>
+              <stop offset="40%" stop-color="#dc2626"/>
+              <stop offset="100%" stop-color="#991b1b"/>
+            </linearGradient>
+          </defs>
+
+          <!-- AWAN BELAKANG -->
+          <g class="iso-cloud-slow" opacity="0.92">
+            <ellipse cx="645" cy="86" rx="56" ry="24" fill="#dbe8f2"/>
+            <circle cx="622" cy="70" r="32" fill="#ffffff"/>
+            <circle cx="658" cy="64" r="38" fill="#ffffff"/>
+            <circle cx="688" cy="80" r="24" fill="#f1f5f9"/>
+          </g>
+          <g class="iso-cloud-med" opacity="0.9">
+            <ellipse cx="1040" cy="170" rx="52" ry="20" fill="#dbe8f2"/>
+            <circle cx="1020" cy="158" r="26" fill="#ffffff"/>
+            <circle cx="1052" cy="152" r="32" fill="#ffffff"/>
+            <circle cx="1078" cy="166" r="20" fill="#f1f5f9"/>
+          </g>
+
+          <!-- BALON UDARA MERAH IKONIK (Kanan Atas) -->
+          <g class="iso-balloon">
+            <!-- Tali keranjang -->
+            <line x1="1082" y1="128" x2="1087" y2="148" stroke="#475569" stroke-width="1.5"/>
+            <line x1="1106" y1="128" x2="1101" y2="148" stroke="#475569" stroke-width="1.5"/>
+            <!-- Keranjang -->
+            <rect x="1084" y="147" width="20" height="14" rx="3" fill="#5c4033" stroke="#3e2723" stroke-width="1.2"/>
+            <!-- Balon utama -->
+            <path d="M1094 26 C1054 26, 1044 82, 1078 128 L1110 128 C1144 82, 1134 26, 1094 26 Z" fill="url(#balloonGrad)"/>
+            <!-- Garis lengkung balon -->
+            <path d="M1094 26 C1076 52, 1078 96, 1086 128" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="2"/>
+            <path d="M1094 26 C1112 52, 1110 96, 1102 128" fill="none" stroke="rgba(0,0,0,0.18)" stroke-width="2"/>
+          </g>
+
+          <!-- BAYANGAN LAUT DI BAWAH PULAU -->
+          <ellipse cx="600" cy="418" rx="545" ry="205" fill="rgba(14, 37, 58, 0.24)"/>
+
+          <!-- TEBING SAMPING 3D PULAU ISOMETRIK -->
+          <path d="M62 355 A538 198 0 0 0 1138 355 L1138 392 A538 198 0 0 1 62 392 Z" fill="url(#islandCliffGrad)"/>
+          <path d="M62 378 A538 198 0 0 0 1138 378 L1138 394 A538 198 0 0 1 62 394 Z" fill="#8293a6" opacity="0.65"/>
+
+          <!-- PERMUKAAN UTAMA PULAU (ELIPS ISOMETRIK PUTIH-KREM) -->
+          <ellipse cx="600" cy="355" rx="538" ry="198" fill="url(#islandTopGrad)" stroke="#ffffff" stroke-width="3"/>
+
+          <!-- DANAU OSPREY & KANAL SUNGAI (Sisi Kiri-Tengah) -->
+          <g>
+            <!-- Bibir cekungan danau -->
+            <path d="M162 336 C158 292, 265 276, 336 296 C382 308, 412 342, 468 376 L444 394 C382 368, 344 388, 264 386 C192 384, 165 364, 162 336 Z" fill="#cbd5e1"/>
+            <!-- Permukaan air danau -->
+            <path d="M168 340 C166 299, 266 284, 334 303 C378 315, 408 347, 466 380 L442 395 C382 371, 342 389, 265 387 C196 385, 170 366, 168 340 Z" fill="url(#lakeWaterGrad)"/>
+            <!-- Riak air halus di danau -->
+            <ellipse class="iso-water-shimmer" cx="275" cy="342" rx="34" ry="11" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1.5"/>
+            <ellipse class="iso-water-shimmer" cx="348" cy="356" rx="20" ry="7" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.4"/>
+            <!-- Kawanan Ikan Berenang Hidup di Danau -->
+            <g class="iso-fish-school">
+              <g class="iso-fish-1">
+                <ellipse cx="0" cy="0" rx="6" ry="2.8" fill="#e0f2fe"/>
+                <polygon class="iso-fish-tail-1" points="-5,0 -10,-3 -10,3" fill="#38bdf8"/>
+                <circle cx="3" cy="-0.6" r="0.8" fill="#0369a1"/>
+              </g>
+              <g class="iso-fish-2">
+                <ellipse cx="0" cy="0" rx="5" ry="2.3" fill="#bae6fd"/>
+                <polygon class="iso-fish-tail-2" points="-4,0 -8.5,-2.5 -8.5,2.5" fill="#0284c7"/>
+                <circle cx="2.5" cy="-0.5" r="0.7" fill="#0c4a6e"/>
+              </g>
+            </g>
+          </g>
+
+          <!-- ELANG OSPREY TERBANG MELINTASI DANAU & PULAU -->
+          <g class="iso-osprey-flight">
+            <g class="iso-osprey-shadow" opacity="0.32">
+              <ellipse cx="0" cy="65" rx="14" ry="4" fill="rgba(15,23,42,0.22)"/>
+            </g>
+            <g class="iso-osprey-body">
+              <ellipse cx="0" cy="0" rx="7" ry="2.5" fill="#1e293b"/>
+              <polygon points="5,-1 9,0 5,1" fill="#f8fafc"/>
+              <polygon points="-7,0 -12,-2.5 -12,2.5" fill="#334155"/>
+              <!-- Sayap elang dengan animasi kepakan mengepak -->
+              <path class="iso-osprey-wing-l" d="M-2 -1 Q-8 -18 -18 -16 Q-12 -6 0 -1" fill="#334155"/>
+              <path class="iso-osprey-wing-r" d="M-2 1 Q-8 18 -18 16 Q-12 6 0 1" fill="#475569"/>
+            </g>
+          </g>
+
+          <!-- KAWAH NGARAI AIR TERJUN ISOMETRIK (Tengah Bawah — persis referensi!) -->
+          <g>
+            <!-- Dinding kiri ngarai -->
+            <polygon points="468,382 560,342 560,418 468,458" fill="#b6c2cf"/>
+            <!-- Dinding kanan ngarai -->
+            <polygon points="560,342 652,382 652,458 560,418" fill="#94a3b8"/>
+            <!-- Dasar kolam ngarai -->
+            <polygon points="560,408 634,440 560,472 486,440" fill="#5b8db8"/>
+            <!-- Aliran Air Terjun Vertikal Aktif Berdegup -->
+            <polygon points="468,382 496,394 496,456 468,444" fill="url(#waterfallGrad)"/>
+            <line class="iso-waterfall-stream-1" x1="477" y1="388" x2="477" y2="446" stroke="rgba(255,255,255,0.75)" stroke-width="2.5" stroke-dasharray="10 8"/>
+            <line class="iso-waterfall-stream-2" x1="487" y1="392" x2="487" y2="450" stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-dasharray="8 6"/>
+            <ellipse class="iso-water-shimmer" cx="496" cy="452" rx="18" ry="6" fill="rgba(255,255,255,0.65)"/>
+            <!-- Partikel Cipratan Embun Air Terjun Naik ke Udara -->
+            <circle class="iso-water-spray iso-spray-1" cx="484" cy="450" r="2" fill="#ffffff"/>
+            <circle class="iso-water-spray iso-spray-2" cx="494" cy="446" r="2.4" fill="#e0f2fe"/>
+            <circle class="iso-water-spray iso-spray-3" cx="504" cy="452" r="1.8" fill="#bae6fd"/>
+            <!-- Bibir bingkai ngarai -->
+            <polygon points="560,342 652,382 560,422 468,382" fill="none" stroke="#dde5ed" stroke-width="3"/>
+          </g>
+
+          <!-- CEKUNGAN ARSITEKTUR KEDUA & JEMBATAN TIMUR (Arena Duel Stage 5) -->
+          <g>
+            <polygon points="710,455 795,418 795,472 710,508" fill="#bdc8d4"/>
+            <polygon points="795,418 880,455 880,508 795,472" fill="#9aa8b8"/>
+            <polygon points="795,462 858,490 795,516 732,490" fill="#cbd5e1"/>
+          </g>
+
+          <!-- JARINGAN JALAN ISOMETRIK PENGHUBUNG 7 STAGE -->
+          <g stroke-linecap="round" stroke-linejoin="round">
+            <!-- Bevel bawah jalan -->
+            <path d="M245 434 L385 329 L545 239 L685 349 L825 449 L960 339 L845 209" fill="none" stroke="#a6bdd0" stroke-width="22"/>
+            <!-- Permukaan atas jalan -->
+            <path d="M245 430 L385 325 L545 235 L685 345 L825 445 L960 335 L845 205" fill="none" stroke="#dce7f1" stroke-width="18"/>
+
+            <!-- Denyut Aliran Energi Algoritma Melintasi Rute Pulau -->
+            <path class="iso-road-energy-stream" d="M245 430 L385 325 L545 235 L685 345 L825 445 L960 335 L845 205" fill="none" stroke="#0ea5e9" stroke-width="3" stroke-dasharray="28 180"/>
+            <path class="iso-road-energy-stream-alt" d="M245 430 L385 325 L545 235 L685 345 L825 445 L960 335 L845 205" fill="none" stroke="#f43f5e" stroke-width="2.2" stroke-dasharray="20 220"/>
+
+            <!-- Zebra Cross Isometrik dekat Lab Pulau -->
+            <g stroke="#ffffff" stroke-width="3.5">
+              <line x1="606" y1="276" x2="618" y2="286"/>
+              <line x1="616" y1="284" x2="628" y2="294"/>
+              <line x1="626" y1="292" x2="638" y2="302"/>
+              <line x1="636" y1="300" x2="648" y2="310"/>
+            </g>
+
+            <!-- Rute progres putus-putus antar node (berubah merah saat terbuka) -->
+            <line id="iso-route-2" x1="245" y1="430" x2="385" y2="325" stroke="#94a3b8" stroke-width="3" stroke-dasharray="7 6"/>
+            <line id="iso-route-3" x1="385" y1="325" x2="545" y2="235" stroke="#94a3b8" stroke-width="3" stroke-dasharray="7 6"/>
+            <line id="iso-route-4" x1="545" y1="235" x2="685" y2="345" stroke="#94a3b8" stroke-width="3" stroke-dasharray="7 6"/>
+            <line id="iso-route-5" x1="685" y1="345" x2="825" y2="445" stroke="#94a3b8" stroke-width="3" stroke-dasharray="7 6"/>
+            <line id="iso-route-6" x1="825" y1="445" x2="960" y2="335" stroke="#94a3b8" stroke-width="3" stroke-dasharray="7 6"/>
+            <line id="iso-route-7" x1="960" y1="335" x2="845" y2="205" stroke="#94a3b8" stroke-width="3" stroke-dasharray="7 6"/>
+          </g>
+
+          <!-- LANDMARK STAGE 1: Tumpukan 3 Blok Monolit Putih (Kiri Bawah) -->
+          <g transform="translate(355, 455)">
+            <ellipse cx="42" cy="64" rx="34" ry="13" fill="rgba(15,23,42,0.12)"/>
+            <!-- Blok Bawah -->
+            <polygon points="42,36 74,50 42,64 10,50" fill="#ffffff"/>
+            <polygon points="10,50 42,64 42,76 10,62" fill="#dce3ea"/>
+            <polygon points="74,50 42,64 42,76 74,62" fill="#b8c4d0"/>
+            <!-- Blok Tengah -->
+            <polygon points="42,16 70,28 42,40 14,28" fill="#ffffff"/>
+            <polygon points="14,28 42,40 42,51 14,39" fill="#dce3ea"/>
+            <polygon points="70,28 42,40 42,51 70,39" fill="#b8c4d0"/>
+            <!-- Blok Atas -->
+            <polygon points="42,-2 66,9 42,20 18,9" fill="#ffffff"/>
+            <polygon points="18,9 42,20 42,30 18,19" fill="#dce3ea"/>
+            <polygon points="66,9 42,20 42,30 66,19" fill="#b8c4d0"/>
+          </g>
+
+          <!-- LANDMARK STAGE 4: Platform Heksagon Boss Lab (Tengah Atas) -->
+          <g transform="translate(685, 272)">
+            <polygon points="-44,6 -20,-8 20,-8 44,6 20,20 -20,20" fill="#991b1b" transform="translate(0, 6)"/>
+            <polygon points="-44,6 -20,-8 20,-8 44,6 20,20 -20,20" fill="#f87171" stroke="#fecaca" stroke-width="1.5"/>
+            <!-- Kristal Boss Lab Mengambang & Berkilau -->
+            <g class="iso-boss-crystal">
+              <ellipse class="iso-crystal-shadow" cx="0" cy="8" rx="10" ry="4" fill="rgba(153,27,27,0.35)"/>
+              <g class="iso-crystal-gem">
+                <polygon points="0,-26 9,-10 0,6 -9,-10" fill="#f43f5e" opacity="0.95"/>
+                <polygon points="0,-26 9,-10 0,-10" fill="#fda4af" opacity="0.9"/>
+                <polygon points="0,-26 -9,-10 0,-10" fill="#e11d48" opacity="0.9"/>
+                <polygon points="0,6 9,-10 0,-10" fill="#be123c" opacity="0.85"/>
+                <polygon points="0,6 -9,-10 0,-10" fill="#9f1239" opacity="0.85"/>
+                <circle cx="0" cy="-10" r="1.5" fill="#ffffff"/>
+              </g>
+            </g>
+          </g>
+
+          <!-- LANDMARK STAGE 6: 3 Gedung Menara Data Merah Isometrik (Kanan — persis referensi!) -->
+          <g transform="translate(985, 222)">
+            <ellipse cx="45" cy="98" rx="54" ry="20" fill="rgba(15,23,42,0.14)"/>
+            <!-- Gelombang Pemancar Data / Radar Antena di puncak menara tinggi -->
+            <g transform="translate(24, 0)">
+              <circle class="iso-radar-wave iso-radar-1" cx="0" cy="0" r="8" fill="none" stroke="#f43f5e" stroke-width="1.8"/>
+              <circle class="iso-radar-wave iso-radar-2" cx="0" cy="0" r="16" fill="none" stroke="#f43f5e" stroke-width="1.3"/>
+              <circle class="iso-radar-wave iso-radar-3" cx="0" cy="0" r="24" fill="none" stroke="#f43f5e" stroke-width="0.9"/>
+              <circle cx="0" cy="0" r="3" fill="#fecdd3"/>
+            </g>
+            <!-- Menara 1 (Kiri Tinggi) -->
+            <polygon points="24,0 50,12 24,24 -2,12" fill="#f87171"/>
+            <polygon points="-2,12 24,24 24,92 -2,80" fill="#dc2626"/>
+            <polygon points="50,12 24,24 24,92 50,80" fill="#991b1b"/>
+            <!-- Jendela titik-titik Menara 1 -->
+            <g fill="#fca5a5" opacity="0.85">
+              <circle cx="6" cy="28" r="2"/><circle cx="15" cy="32" r="2"/>
+              <circle cx="6" cy="40" r="2"/><circle cx="15" cy="44" r="2"/>
+              <circle cx="6" cy="52" r="2"/><circle cx="15" cy="56" r="2"/>
+              <circle cx="6" cy="64" r="2"/><circle cx="15" cy="68" r="2"/>
+            </g>
+
+            <!-- Menara 2 (Kanan Sedang) -->
+            <g transform="translate(42, 22)">
+              <polygon points="22,0 44,10 22,20 0,10" fill="#f87171"/>
+              <polygon points="0,10 22,20 22,74 0,64" fill="#dc2626"/>
+              <polygon points="44,10 22,20 22,74 44,64" fill="#991b1b"/>
+              <g fill="#fca5a5" opacity="0.85">
+                <circle cx="7" cy="24" r="1.8"/><circle cx="15" cy="28" r="1.8"/>
+                <circle cx="7" cy="36" r="1.8"/><circle cx="15" cy="40" r="1.8"/>
+                <circle cx="7" cy="48" r="1.8"/><circle cx="15" cy="52" r="1.8"/>
+              </g>
+            </g>
+
+            <!-- Menara 3 (Depan Kecil) -->
+            <g transform="translate(16, 42)">
+              <polygon points="18,0 36,8 18,16 0,8" fill="#fb7185"/>
+              <polygon points="0,8 18,16 18,58 0,50" fill="#e11d48"/>
+              <polygon points="36,8 18,16 18,58 36,50" fill="#881337"/>
+            </g>
+          </g>
+
+          <!-- LANDMARK STAGE 7: Pin Lokasi Merah Raksasa di Puncak Utara -->
+          <g transform="translate(845, 134)">
+            <ellipse cx="0" cy="48" rx="14" ry="5" fill="rgba(15,23,42,0.18)"/>
+            <g class="iso-pin-float">
+              <path d="M0 44 C-4 32, -22 18, -22 4 A22 22 0 1 1 22 4 C22 18, 4 32, 0 44 Z" fill="#dc2626" stroke="#991b1b" stroke-width="2"/>
+              <circle cx="0" cy="4" r="8.5" fill="#ffffff"/>
+            </g>
+          </g>
+
+          <!-- PEPOHONAN ISOMETRIK 3D DI SEKELILING PULAU -->
+          <!-- Pohon 1 (Kiri Atas Danau) -->
+          <g transform="translate(290, 210)">
+            <ellipse cx="0" cy="58" rx="22" ry="8" fill="rgba(15,23,42,0.14)"/>
+            <path d="M-2 58 Q-4 38 4 24" stroke="#4a3728" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <g class="iso-tree-sway">
+              <ellipse cx="-12" cy="22" rx="22" ry="18" fill="url(#treeFoliageGrad)"/>
+              <ellipse cx="10" cy="14" rx="26" ry="22" fill="url(#treeFoliageGrad)"/>
+            </g>
+          </g>
+          <!-- Pohon 2 (Kiri Bawah) -->
+          <g transform="translate(225, 468)">
+            <ellipse cx="0" cy="52" rx="20" ry="7" fill="rgba(15,23,42,0.14)"/>
+            <path d="M2 52 Q-5 34 0 20" stroke="#4a3728" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+            <g class="iso-tree-sway-alt">
+              <ellipse cx="12" cy="22" rx="20" ry="16" fill="url(#treeFoliageGrad)"/>
+              <ellipse cx="-6" cy="14" rx="24" ry="19" fill="url(#treeFoliageGrad)"/>
+            </g>
+          </g>
+          <!-- Pohon 3 & 4 (Hutan Simpanse Stage 3) -->
+          <g transform="translate(480, 178)">
+            <ellipse cx="0" cy="48" rx="18" ry="6" fill="rgba(15,23,42,0.14)"/>
+            <path d="M0 48 Q3 30 -2 18" stroke="#4a3728" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <g class="iso-tree-sway">
+              <ellipse cx="0" cy="14" rx="23" ry="18" fill="url(#treeFoliageGrad)"/>
+            </g>
+          </g>
+          <g transform="translate(598, 295)">
+            <ellipse cx="0" cy="52" rx="20" ry="7" fill="rgba(15,23,42,0.14)"/>
+            <path d="M-2 52 Q-4 34 4 20" stroke="#4a3728" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+            <g class="iso-tree-sway-alt">
+              <ellipse cx="10" cy="18" rx="18" ry="14" fill="url(#treeFoliageGrad)"/>
+              <ellipse cx="-6" cy="12" rx="22" ry="18" fill="url(#treeFoliageGrad)"/>
+            </g>
+          </g>
+          <!-- Pohon 5 (Kanan Bawah) -->
+          <g transform="translate(1035, 430)">
+            <ellipse cx="0" cy="56" rx="22" ry="8" fill="rgba(15,23,42,0.14)"/>
+            <path d="M0 56 Q-6 36 3 22" stroke="#4a3728" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <g class="iso-tree-sway">
+              <ellipse cx="-10" cy="22" rx="21" ry="16" fill="url(#treeFoliageGrad)"/>
+              <ellipse cx="10" cy="14" rx="25" ry="20" fill="url(#treeFoliageGrad)"/>
+            </g>
+          </g>
+
+          <!-- AWAN DEPAN KIRI (Memberi efek kedalaman atmosferik) -->
+          <g class="iso-cloud-med" opacity="0.95">
+            <ellipse cx="155" cy="238" rx="54" ry="20" fill="#dbe8f2"/>
+            <circle cx="132" cy="224" r="28" fill="#ffffff"/>
+            <circle cx="168" cy="218" r="34" fill="#ffffff"/>
+            <circle cx="195" cy="232" r="22" fill="#f8fafc"/>
+          </g>
+          <g class="iso-cloud-slow" opacity="0.94">
+            <ellipse cx="148" cy="462" rx="48" ry="18" fill="#dbe8f2"/>
+            <circle cx="130" cy="450" r="24" fill="#ffffff"/>
+            <circle cx="160" cy="444" r="30" fill="#ffffff"/>
+          </g>
+
+          <!-- PARTIKEL AMBIEN EMAS & CYAN MELAYANG (PULAU HIDUP) -->
+          <g class="iso-ambient-spores" pointer-events="none">
+            <circle class="iso-spore iso-spore-1" cx="310" cy="360" r="2.2" fill="#38bdf8"/>
+            <circle class="iso-spore iso-spore-2" cx="520" cy="280" r="2.5" fill="#fbbf24"/>
+            <circle class="iso-spore iso-spore-3" cx="640" cy="380" r="1.8" fill="#38bdf8"/>
+            <circle class="iso-spore iso-spore-4" cx="780" cy="290" r="2.4" fill="#fbbf24"/>
+            <circle class="iso-spore iso-spore-5" cx="910" cy="410" r="2" fill="#38bdf8"/>
+            <circle class="iso-spore iso-spore-6" cx="440" cy="460" r="1.7" fill="#fbbf24"/>
+          </g>
+        </svg>
+
+        <!-- Lapisan Node HTML Interaktif, Avatar Optimizer & Tombol PLAY -->
+        <div class="island-nodes-overlay" id="islandNodesOverlay"></div>
+      </div>
+    </main>
+
+    <!-- DOCK BAWAH: STRIP STAGE CEPAT + BRIEFING PEMANDU -->
+    <section class="island-dock" aria-label="Panel Misi Aktif">
+      <div class="island-dock-inner">
+        <div class="stage-chips-strip" id="stageChipsStrip" role="group" aria-label="Pilih Stage Cepat"></div>
+
+        <div class="briefing-card" id="briefingCard">
+          <div class="briefing-guide">
+            <div class="briefing-avatar" id="briefingIcon" aria-hidden="true">🎓</div>
+            <div class="briefing-copy">
+              <div class="briefing-meta">
+                <span class="briefing-stage-pill" id="briefingStagePill">STAGE 01 / 07</span>
+                <span class="briefing-reward-pill" id="briefingRewardPill">Hadiah: +100 XP • Badge "Pemula"</span>
+              </div>
+              <h2 class="briefing-title" id="briefingTitle">Base Camp: Memahami Medan</h2>
+              <p class="briefing-desc" id="briefingDesc">
+                Pelajari struktur ruang pencarian berdimensi D, fungsi objektif tanpa gradien, serta keseimbangan eksplorasi dan eksploitasi.
+              </p>
+            </div>
+          </div>
+
+          <div class="briefing-actions">
+            <button type="button" class="briefing-nav-btn" id="btnBriefingPrev" aria-label="Pilih stage sebelumnya">
+              <span aria-hidden="true">←</span>
+            </button>
+            <button type="button" class="briefing-nav-btn" id="btnBriefingNext" aria-label="Pilih stage berikutnya">
+              <span aria-hidden="true">→</span>
+            </button>
+            <button type="button" class="briefing-play-cta" id="btnBriefingPlay">
+              <span aria-hidden="true">▶</span>
+              <span>PLAY STAGE 1</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Host Notifikasi Toast (popover="manual"), Live Region Screen Reader & Canvas Konfeti -->
+    <div id="gameToastHost"></div>
+    <div id="srLivePolite" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+    <canvas id="gameConfettiCanvas" aria-hidden="true"></canvas>
+  </div>
+
+  <!-- MODAL KOLEKSI BADGE & PENCAPAIAN -->
+  <dialog class="badges-dialog p-6" id="badgesDialog" closedby="any" aria-labelledby="badgesDialogTitle">
+    <div class="flex items-center justify-between pb-3 border-b border-outline-variant/40">
+      <div>
+        <span class="font-code-sm text-xs uppercase tracking-wider text-primary font-bold">CATATAN EKSPEDISI</span>
+        <h2 class="font-headline-md text-2xl font-bold text-on-surface" id="badgesDialogTitle">Koleksi Badge Pulau Metaheuristik</h2>
+      </div>
+      <button type="button" class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface" id="btnCloseBadgesDialog" aria-label="Tutup jendela badge" autofocus>
+        <span class="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
+      </button>
+    </div>
+    <p class="font-code-sm text-xs text-on-surface-variant mt-3" id="badgesModalSummary"></p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4" id="badgesModalGrid"></div>
+  </dialog>
+
+  <!-- 7 STAGE PANELS (Berisi 100% Konten & Kontrol Akademik Asli Tanpa Perubahan Logika) -->
+
+  <!-- STAGE 1 MODAL DIALOG -->
+  <dialog class="stage-dialog" id="stage-dialog-1" data-stage="1" closedby="any" aria-labelledby="stage-modal-title-1">
+    <div class="stage-modal-topbar">
+      <button type="button" class="stage-back-btn" data-modal-close="true" autofocus>
+        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">map</span>
+        <span>Peta Pulau</span>
+      </button>
+
+      <div class="stage-topbar-center">
+        <span class="stage-badge-tag">STAGE 01/07</span>
+        <h2 class="stage-topbar-title" id="stage-modal-title-1">Base Camp: Memahami Medan</h2>
+        <span class="hidden sm:inline-block font-code-sm text-xs px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30" data-modal-reward="true">+XP</span>
+      </div>
+
+      <div class="stage-topbar-controls">
+        <button type="button" class="stage-step-nav-btn" data-modal-prev="true" aria-label="Stage sebelumnya">
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">chevron_left</span>
+          <span class="hidden md:inline">Prev</span>
+        </button>
+        <button type="button" class="stage-step-nav-btn" data-modal-next="true" aria-label="Stage berikutnya">
+          <span class="hidden md:inline">Next</span>
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">chevron_right</span>
         </button>
       </div>
     </div>
-  </header>
 
-  <!-- Mobile Drawer Backdrop & Menu -->
-  <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden lg:hidden transition-opacity" id="mobileBackdrop"></div>
-  <div class="fixed top-0 right-0 bottom-0 w-72 bg-surface z-50 translate-x-full shadow-2xl flex flex-col p-space-md lg:hidden" id="mobileDrawer">
-    <div class="flex items-center justify-between pb-space-sm border-b border-outline-variant">
-      <span class="font-code-sm font-bold text-primary">NAVIGASI MODUL</span>
-      <button class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant" id="mobileMenuCloseBtn">
-        <span class="material-symbols-outlined text-[20px]">close</span>
-      </button>
-    </div>
-    <div class="flex flex-col gap-1 py-space-md flex-1 overflow-y-auto font-label-md text-sm">
-      <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="overview" href="#overview">Overview &amp; Fondasi</a>
-      <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="ooa-osprey" href="#ooa-osprey">OOA (Osprey Optimization)</a>
-      <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="choa-chimp" href="#choa-chimp">ChOA (Chimp Optimization)</a>
-      <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="interactive-lab" href="#interactive-lab">Laboratorium Interaktif</a>
-      <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="comparison" href="#comparison">Perbandingan Algoritma</a>
-      <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="experiment" href="#experiment">Eksperimen Monte Carlo</a>
-      <a class="px-space-sm py-2 rounded-lg text-on-surface hover:bg-surface-container" data-path="references" href="#references">Daftar Pustaka &amp; Sitasi</a>
-    </div>
-    <div class="pt-space-sm border-t border-outline-variant text-xs font-code-sm text-tertiary">
-      <span>IEEE-754 FP64 WASM/JS Engine</span>
-    </div>
-  </div>
-
-  <!-- Konten Utama -->
-  <main class="w-full flex-1 pt-20 bg-surface">
-    <div class="flex flex-col w-full">
-
-      <!-- Context Header Strip -->
+    <div class="stage-modal-body">
       <section class="w-full bg-surface-container-low py-2 px-margin-mobile lg:px-margin border-b border-outline-variant/30">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-space-xs text-on-surface-variant font-code-sm text-xs">
           <div class="flex items-center gap-space-sm flex-wrap">
@@ -167,7 +617,6 @@
         </div>
       </section>
 
-      <!-- SECTION 1: OVERVIEW & PENGENALAN -->
       <section class="w-full py-space-xl px-margin-mobile lg:px-margin" id="overview">
         <div class="max-w-7xl mx-auto space-y-space-xl">
           
@@ -346,8 +795,37 @@
 
         </div>
       </section>
+    </div>
+  </dialog>
 
-      <!-- SECTION 2: OOA IN-DEPTH -->
+
+  <!-- STAGE 2 MODAL DIALOG -->
+  <dialog class="stage-dialog" id="stage-dialog-2" data-stage="2" closedby="any" aria-labelledby="stage-modal-title-2">
+    <div class="stage-modal-topbar">
+      <button type="button" class="stage-back-btn" data-modal-close="true" autofocus>
+        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">map</span>
+        <span>Peta Pulau</span>
+      </button>
+
+      <div class="stage-topbar-center">
+        <span class="stage-badge-tag">STAGE 02/07</span>
+        <h2 class="stage-topbar-title" id="stage-modal-title-2">Danau Osprey — OOA</h2>
+        <span class="hidden sm:inline-block font-code-sm text-xs px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30" data-modal-reward="true">+XP</span>
+      </div>
+
+      <div class="stage-topbar-controls">
+        <button type="button" class="stage-step-nav-btn" data-modal-prev="true" aria-label="Stage sebelumnya">
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">chevron_left</span>
+          <span class="hidden md:inline">Prev</span>
+        </button>
+        <button type="button" class="stage-step-nav-btn" data-modal-next="true" aria-label="Stage berikutnya">
+          <span class="hidden md:inline">Next</span>
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">chevron_right</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="stage-modal-body">
       <section class="w-full py-space-xl px-margin-mobile lg:px-margin bg-surface-container-low border-t border-b border-outline-variant/30" id="ooa-osprey">
         <div class="max-w-7xl mx-auto space-y-space-xl">
           
@@ -508,8 +986,37 @@ Output: Solusi Terbaik Global X* dan Nilai Biaya f(X*)
 
         </div>
       </section>
+    </div>
+  </dialog>
 
-      <!-- SECTION 3: ChOA IN-DEPTH -->
+
+  <!-- STAGE 3 MODAL DIALOG -->
+  <dialog class="stage-dialog" id="stage-dialog-3" data-stage="3" closedby="any" aria-labelledby="stage-modal-title-3">
+    <div class="stage-modal-topbar">
+      <button type="button" class="stage-back-btn" data-modal-close="true" autofocus>
+        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">map</span>
+        <span>Peta Pulau</span>
+      </button>
+
+      <div class="stage-topbar-center">
+        <span class="stage-badge-tag">STAGE 03/07</span>
+        <h2 class="stage-topbar-title" id="stage-modal-title-3">Hutan Simpanse — ChOA</h2>
+        <span class="hidden sm:inline-block font-code-sm text-xs px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30" data-modal-reward="true">+XP</span>
+      </div>
+
+      <div class="stage-topbar-controls">
+        <button type="button" class="stage-step-nav-btn" data-modal-prev="true" aria-label="Stage sebelumnya">
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">chevron_left</span>
+          <span class="hidden md:inline">Prev</span>
+        </button>
+        <button type="button" class="stage-step-nav-btn" data-modal-next="true" aria-label="Stage berikutnya">
+          <span class="hidden md:inline">Next</span>
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">chevron_right</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="stage-modal-body">
       <section class="w-full py-space-xl px-margin-mobile lg:px-margin bg-surface" id="choa-chimp">
         <div class="max-w-7xl mx-auto space-y-space-xl">
           
@@ -713,8 +1220,37 @@ Output: Posisi Attacker X_alpha dan Nilai Biaya f(X_alpha)
 
         </div>
       </section>
+    </div>
+  </dialog>
 
-      <!-- SECTION 4: THE INTERACTIVE LAB (MAIN ENGINE) -->
+
+  <!-- STAGE 4 MODAL DIALOG -->
+  <dialog class="stage-dialog" id="stage-dialog-4" data-stage="4" closedby="any" aria-labelledby="stage-modal-title-4">
+    <div class="stage-modal-topbar">
+      <button type="button" class="stage-back-btn" data-modal-close="true" autofocus>
+        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">map</span>
+        <span>Peta Pulau</span>
+      </button>
+
+      <div class="stage-topbar-center">
+        <span class="stage-badge-tag">STAGE 04/07</span>
+        <h2 class="stage-topbar-title" id="stage-modal-title-4">Lab Pulau: Simulasi Kernel 2D</h2>
+        <span class="hidden sm:inline-block font-code-sm text-xs px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30" data-modal-reward="true">+XP</span>
+      </div>
+
+      <div class="stage-topbar-controls">
+        <button type="button" class="stage-step-nav-btn" data-modal-prev="true" aria-label="Stage sebelumnya">
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">chevron_left</span>
+          <span class="hidden md:inline">Prev</span>
+        </button>
+        <button type="button" class="stage-step-nav-btn" data-modal-next="true" aria-label="Stage berikutnya">
+          <span class="hidden md:inline">Next</span>
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">chevron_right</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="stage-modal-body">
       <section class="w-full py-space-xl px-margin-mobile lg:px-margin bg-surface-container-low border-t border-b border-outline-variant/30" id="interactive-lab">
         <div class="max-w-7xl mx-auto space-y-space-lg">
           
@@ -935,8 +1471,37 @@ Output: Posisi Attacker X_alpha dan Nilai Biaya f(X_alpha)
 
         </div>
       </section>
+    </div>
+  </dialog>
 
-      <!-- SECTION 5: ALGORITHM COMPARISON -->
+
+  <!-- STAGE 5 MODAL DIALOG -->
+  <dialog class="stage-dialog" id="stage-dialog-5" data-stage="5" closedby="any" aria-labelledby="stage-modal-title-5">
+    <div class="stage-modal-topbar">
+      <button type="button" class="stage-back-btn" data-modal-close="true" autofocus>
+        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">map</span>
+        <span>Peta Pulau</span>
+      </button>
+
+      <div class="stage-topbar-center">
+        <span class="stage-badge-tag">STAGE 05/07</span>
+        <h2 class="stage-topbar-title" id="stage-modal-title-5">Arena Duel: Komparasi Sinkron OOA vs ChOA</h2>
+        <span class="hidden sm:inline-block font-code-sm text-xs px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30" data-modal-reward="true">+XP</span>
+      </div>
+
+      <div class="stage-topbar-controls">
+        <button type="button" class="stage-step-nav-btn" data-modal-prev="true" aria-label="Stage sebelumnya">
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">chevron_left</span>
+          <span class="hidden md:inline">Prev</span>
+        </button>
+        <button type="button" class="stage-step-nav-btn" data-modal-next="true" aria-label="Stage berikutnya">
+          <span class="hidden md:inline">Next</span>
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">chevron_right</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="stage-modal-body">
       <section class="w-full py-space-xl px-margin-mobile lg:px-margin bg-surface" id="comparison">
         <div class="max-w-7xl mx-auto space-y-space-lg">
           
@@ -1028,8 +1593,37 @@ Output: Posisi Attacker X_alpha dan Nilai Biaya f(X_alpha)
 
         </div>
       </section>
+    </div>
+  </dialog>
 
-      <!-- SECTION 6: EXPERIMENT LAB & CSV EXPORT -->
+
+  <!-- STAGE 6 MODAL DIALOG -->
+  <dialog class="stage-dialog" id="stage-dialog-6" data-stage="6" closedby="any" aria-labelledby="stage-modal-title-6">
+    <div class="stage-modal-topbar">
+      <button type="button" class="stage-back-btn" data-modal-close="true" autofocus>
+        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">map</span>
+        <span>Peta Pulau</span>
+      </button>
+
+      <div class="stage-topbar-center">
+        <span class="stage-badge-tag">STAGE 06/07</span>
+        <h2 class="stage-topbar-title" id="stage-modal-title-6">Menara Statistik: Replikasi Monte Carlo</h2>
+        <span class="hidden sm:inline-block font-code-sm text-xs px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30" data-modal-reward="true">+XP</span>
+      </div>
+
+      <div class="stage-topbar-controls">
+        <button type="button" class="stage-step-nav-btn" data-modal-prev="true" aria-label="Stage sebelumnya">
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">chevron_left</span>
+          <span class="hidden md:inline">Prev</span>
+        </button>
+        <button type="button" class="stage-step-nav-btn" data-modal-next="true" aria-label="Stage berikutnya">
+          <span class="hidden md:inline">Next</span>
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">chevron_right</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="stage-modal-body">
       <section class="w-full py-space-xl px-margin-mobile lg:px-margin bg-surface-container-low border-t border-b border-outline-variant/30" id="experiment">
         <div class="max-w-7xl mx-auto space-y-space-lg">
           
@@ -1095,8 +1689,37 @@ Output: Posisi Attacker X_alpha dan Nilai Biaya f(X_alpha)
 
         </div>
       </section>
+    </div>
+  </dialog>
 
-      <!-- SECTION 7: SCIENTIFIC REFERENCES & CITATION -->
+
+  <!-- STAGE 7 MODAL DIALOG -->
+  <dialog class="stage-dialog" id="stage-dialog-7" data-stage="7" closedby="any" aria-labelledby="stage-modal-title-7">
+    <div class="stage-modal-topbar">
+      <button type="button" class="stage-back-btn" data-modal-close="true" autofocus>
+        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">map</span>
+        <span>Peta Pulau</span>
+      </button>
+
+      <div class="stage-topbar-center">
+        <span class="stage-badge-tag">STAGE 07/07</span>
+        <h2 class="stage-topbar-title" id="stage-modal-title-7">Perpustakaan Pulau & Sitasi Ilmiah</h2>
+        <span class="hidden sm:inline-block font-code-sm text-xs px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30" data-modal-reward="true">+XP</span>
+      </div>
+
+      <div class="stage-topbar-controls">
+        <button type="button" class="stage-step-nav-btn" data-modal-prev="true" aria-label="Stage sebelumnya">
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">chevron_left</span>
+          <span class="hidden md:inline">Prev</span>
+        </button>
+        <button type="button" class="stage-step-nav-btn" data-modal-next="true" aria-label="Stage berikutnya">
+          <span class="hidden md:inline">Next</span>
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">chevron_right</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="stage-modal-body">
       <section class="w-full py-space-xl px-margin-mobile lg:px-margin bg-surface" id="references">
         <div class="max-w-7xl mx-auto space-y-space-xl">
           
@@ -1169,15 +1792,6 @@ Output: Posisi Attacker X_alpha dan Nilai Biaya f(X_alpha)
         </div>
       </section>
 
-    </div>
-  </main>
-
-  <!-- Tombol Melayang Back to Top -->
-  <button class="fixed bottom-6 right-6 z-40 p-3 rounded-full bg-primary text-on-primary shadow-lg opacity-0 pointer-events-none transition-all duration-300 hover:bg-primary-container" id="btnBackToTop" aria-label="Kembali ke atas">
-    <span class="material-symbols-outlined text-[20px]">arrow_upward</span>
-  </button>
-
-  <!-- Footer Akademik -->
   <footer class="w-full bg-surface-container-low border-t border-outline-variant/40 py-space-xl mt-space-xl">
     <div class="max-w-7xl mx-auto px-margin-mobile lg:px-margin">
       <div class="grid grid-cols-1 md:grid-cols-12 gap-space-lg mb-space-lg">
@@ -1225,8 +1839,16 @@ Output: Posisi Attacker X_alpha dan Nilai Biaya f(X_alpha)
       </div>
     </div>
   </footer>
+    </div>
+  </dialog>
 
-  <!-- Modular Script Execution Pipeline -->
+
+  <!-- Tombol Back to Top (Kompatibel penuh dengan navigation.js) -->
+  <button type="button" class="fixed bottom-6 right-6 z-40 p-3 rounded-full bg-primary text-on-primary shadow-lg opacity-0 pointer-events-none transition-all duration-300 hover:bg-primary-container" id="btnBackToTop" aria-label="Kembali ke atas">
+    <span class="material-symbols-outlined text-[20px]" aria-hidden="true">arrow_upward</span>
+  </button>
+
+  <!-- Modular Script Execution Pipeline (Engine Lama Tetap Utuh + Layer Gamification Baru) -->
   <script src="js/benchmarks/functions.js"></script>
   <script src="js/algorithms/ooa.js"></script>
   <script src="js/algorithms/choa.js"></script>
@@ -1237,6 +1859,12 @@ Output: Posisi Attacker X_alpha dan Nilai Biaya f(X_alpha)
   <script src="js/navigation.js"></script>
   <script src="js/app.js"></script>
 
+  <!-- Modul Gamification Pulau Misi (Pure Vanilla JS) -->
+  <script src="js/game/audio.js"></script>
+  <script src="js/game/state.js"></script>
+  <script src="js/game/ui.js"></script>
+  <script src="js/game/quests.js"></script>
+  <script src="js/game/map.js"></script>
+
 </body>
 </html>
-

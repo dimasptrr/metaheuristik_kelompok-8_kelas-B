@@ -59,6 +59,9 @@ pre code {
 
 .animate-subtle {
   animation: subtlePulse 3s infinite ease-in-out;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 }
 
 /* Interactive Card Hover Depth */
@@ -71,8 +74,15 @@ pre code {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
+/* Stage Dialog Section Spacing Refinement */
+dialog.stage-dialog .stage-modal-body > section {
+  padding-top: 1.5rem;
+  padding-bottom: 1.75rem;
+  border-top: none;
+  border-bottom: none;
+}
+
 /* Mobile Drawer Transition */
 #mobileDrawer {
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
